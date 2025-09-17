@@ -1,0 +1,40 @@
+﻿@model Reports.Models.UploadedFile
+
+@{
+    ViewData["Title"] = "Delete File";
+}
+
+<div class="container mt-4">
+    <h2 class="text-danger mb-4">Delete File</h2>
+
+    <h5>Are you sure you want to delete this file?</h5>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Name:</strong> @Model.FileName</p>
+            <p><strong>Type:</strong> @Model.FileType</p>
+            <p><strong>Uploaded:</strong> @Model.UploadedOn</p>
+
+            @if (Model.FileType == "Image")
+            {
+                <img src="@Model.FilePath" style="max-width:200px;" class="img-thumbnail" />
+            }
+            else
+            {
+                <a href="@Model.FilePath" target="_blank" class="btn btn-outline-info btn-sm">
+                    <i class="bi bi-file-earmark-text"></i> View Document
+                </a>
+            }
+        </div>
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Delete
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Cancel
+        </a>
+    </form>
+</div>

@@ -1,0 +1,100 @@
+﻿@model IEnumerable<Reports.Models.Summary>
+
+@{
+    ViewData["Title"] = "Summaries";
+}
+
+<style>
+    .table td{
+        font-size: 12px;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">Summaries</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Create New
+        </a>
+        <a asp-action="VoucherList" class="btn btn-outline-primary">
+            <i class="bi bi-collection"></i> Voucher Summaries
+        </a>
+    </div>
+
+    <!-- 🔎 Universal Search Bar -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="d-flex gap-2">
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm"
+                       class="form-control" placeholder="Search by voucher, venue, county, date, etc..." />
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Reset
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📋 Data Table -->
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.Date)</th>
+                            <th>Voucher Name</th>
+                            <th>@Html.DisplayNameFor(model => model.Venue)</th>
+                            <th>Hall Hire (Ksh)</th>
+                            <th>Farmers (Ksh)</th>
+                            <th>EATotal (Ksh)</th>
+                            <th>Venue (Ksh)</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Date)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Voucher.VoucheName)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Venue.Name)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.HallHireTotal)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.LeadFarmersTotal)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.EATotal)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.SubTotalperVenue)</td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </a>
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">
+                                                <i class="bi bi-eye"></i> Details
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger"
+                                               onclick="return confirm('Are you sure you want to delete this voucher?');">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="19" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox"></i> No records found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

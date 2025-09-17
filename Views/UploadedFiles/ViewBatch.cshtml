@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Reports.Models.UploadedFile>
+@{
+    ViewData["Title"] = "View Batch Files";
+}
+
+<div class="container mt-4">
+    <h2>Files in Batch</h2>
+    <div class="list-group">
+        @foreach (var file in Model)
+        {
+            <div class="list-group-item d-flex align-items-center">
+                @if (file.FileType == "Image")
+                {
+                    <a href="@file.FilePath" target="_blank">
+                        <img src="@file.FilePath" class="img-thumbnail me-3" style="max-height:80px;" />
+                    </a>
+                }
+                else
+                {
+                    <i class="bi bi-file-earmark-text fs-3 text-secondary me-3"></i>
+                }
+                <div>
+                    <div class="fw-bold">@file.FileName</div>
+                    <a href="@file.FilePath" target="_blank">View File</a>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Back to Batches</a>
+    </div>
+</div>

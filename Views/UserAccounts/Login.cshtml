@@ -1,0 +1,178 @@
+﻿@model Reports.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - BetterLife</title>
+
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background: #FFFAFA; /* whitesnow background */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .glass-form {
+            background: rgba(255, 255, 255, 0.9); /* lighter glass effect */
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 400px;
+            color: #333333; /* dark text for readability */
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+            .glass-form h3 {
+                font-weight: 700;
+                font-size: 28px;
+                margin-bottom: 30px;
+                text-align: center;
+                color: #2C3E50; /* darker accent */
+            }
+
+        label {
+            font-weight: 600;
+            color: #2C3E50;
+        }
+
+        .form-control {
+            background-color: rgba(236, 240, 241, 0.8); /* light grayish input */
+            border: 1px solid rgba(189, 195, 199, 0.8);
+            color: #2C3E50;
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+            .form-control::placeholder {
+                color: #95A5A6;
+            }
+
+            .form-control:focus {
+                background-color: rgba(236, 240, 241, 1);
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+                color: #2C3E50;
+            }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 65%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #2C3E50;
+            font-size: 1.2rem;
+        }
+
+        .form-check-label,
+        .text-danger {
+            color: #C0392B; /* modern red for errors */
+        }
+
+        .btn-primary {
+            background-color: #3498DB; /* soft blue */
+            border: none;
+            font-weight: bold;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 10px;
+            color: #fff;
+        }
+
+            .btn-primary:hover {
+                background-color: #2980B9; /* darker blue on hover */
+            }
+
+        a {
+            color: #3498DB;
+            text-decoration: underline;
+        }
+
+            a:hover {
+                color: #2980B9;
+            }
+
+        .position-relative {
+            position: relative;
+        }
+
+        small {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #7F8C8D;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="glass-form">
+        <h3 class="mb-4">Welcome Back</h3>
+        <small>Please log in to continue to your account</small>
+
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Username"></label>
+                <input asp-for="Username" class="form-control" placeholder="Enter your email" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 position-relative">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" id="passwordField" />
+                <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" value="true">
+                <label class="form-check-label" for="rememberMe">Remember me</label>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </div>
+
+            <div class="text-center">
+                <a asp-action="ResetPassword" asp-controller="UserAccounts">Forgot password?</a>
+            </div>
+
+            @* <div class="text-center mt-3">
+                <p>
+                    Don't have an account? <a asp-action="Register">Register here</a>.
+                </p>
+            </div> *@
+        </form>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            const pwd = document.getElementById("passwordField");
+            const type = pwd.getAttribute("type") === "password" ? "text" : "password";
+            pwd.setAttribute("type", type);
+            this.classList.toggle("bi-eye");
+            this.classList.toggle("bi-eye-slash");
+        });
+    </script>
+</body>
+</html>

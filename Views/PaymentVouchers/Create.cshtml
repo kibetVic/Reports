@@ -1,0 +1,107 @@
+﻿@model Reports.Models.PaymentVoucher
+
+@{
+    ViewData["Title"] = "Create Payment Voucher";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg rounded-3">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">Create Payment Voucher</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="VoucheName" class="form-label fw-bold">Voucher Name</label>
+                        <input asp-for="VoucheName" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="PaymentMode" class="form-label fw-bold"></label>
+                        <select asp-for="PaymentMode" class="form-select">
+                            <option value="M-pesa">M-pesa</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PaymentInFavourOf" class="form-label fw-bold"></label>
+                        <input asp-for="PaymentInFavourOf" class="form-control" />
+                    </div>
+                </div>
+
+                <h4 class="mt-4">Voucher Items</h4>
+                <table class="table table-bordered table-striped align-middle mt-2" id="itemsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Number</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Cts</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button type="button" class="btn btn-success mb-3" onclick="addItem()">+ Add Item</button>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="PreparedBy" class="form-label fw-bold">Prepared By</label>
+                        <input asp-for="PreparedBy" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="CheckedBy" class="form-label fw-bold">Checked By</label>
+                        <input asp-for="CheckedBy" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="ApprovedBy" class="form-label fw-bold">Approved By</label>
+                        <input asp-for="ApprovedBy" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary px-4">Save Voucher</button>
+                    <a asp-action="Index" class="btn btn-secondary px-4">⬅ Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let itemIndex = 0;
+
+        function addItem() {
+            const tbody = document.querySelector("#itemsTable tbody");
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td><input name="Items[${itemIndex}].ItemNo" class="form-control" type="number" /></td>
+                <td><input name="Items[${itemIndex}].Description" class="form-control" /></td>
+                <td><input name="Items[${itemIndex}].Amount" class="form-control" type="number" step="0.01" /></td>
+                <td><input name="Items[${itemIndex}].Cts" class="form-control" type="number" step="1" /></td>
+                <td class="text-center"><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Remove</button></td>
+            `;
+
+            tbody.appendChild(row);
+            itemIndex++;
+        }
+
+        function removeItem(button) {
+            button.closest("tr").remove();
+            reindexItems();
+        }
+
+        function reindexItems() {
+            const rows = document.querySelectorAll("#itemsTable tbody tr");
+            rows.forEach((row, index) => {
+                row.querySelectorAll("input").forEach(input => {
+                    input.name = input.name.replace(/\[\d+\]/, `[${index}]`);
+                });
+            });
+            itemIndex = rows.length;
+        }
+    </script>
+}

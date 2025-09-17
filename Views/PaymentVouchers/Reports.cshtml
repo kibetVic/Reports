@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Reports.Models.PaymentVoucher>
+
+@{
+    ViewData["Title"] = "Voucher Reports";
+    var counter = 1;
+    var vouchers = Model.OrderByDescending(v => v.Date).ToList();
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header text-black d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-bar-chart"></i>Reports</h4>
+            <small class="text-black-50">Latest vouchers listed below</small>
+        </div>
+
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead class="table-primary">
+                            <tr>
+                                <th style="width: 60px;">No</th>
+                                <th>Voucher No</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Summaries</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var v in vouchers)
+                            {
+                                <tr>
+                                    <td>@counter</td>
+                                    <td>@v.VoucherNumber</td>
+                                    <td>@v.VoucheName</td>
+                                    <td>@v.Date.ToString("dd MMM yyyy")</td>
+                                    <td>@(v.Summaries?.Count ?? 0)</td>
+                                    <td class="text-center">
+                                        <a asp-action="GenerateFullReport" asp-route-id="@v.PaymentVoucherId"
+                                           class="btn btn-sm btn-success d-inline-flex align-items-center gap-1">
+                                            <i class="bi bi-file-earmark-text"></i> Full Report
+                                        </a>
+                                    </td>
+                                </tr>
+                                counter++;
+                            }
+                        </tbody>
+                    </table>                
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-muted small">
+            Showing <strong>@vouchers.Count</strong> voucher reports
+        </div>
+    </div>
+</div>

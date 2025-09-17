@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Reports.Models.UploadedFile>
+
+@{
+    ViewData["Title"] = "Uploaded Files";
+}
+
+<style>
+    .table tr td {
+        font-size: 12px;
+        font-family: 'Times New Roman', Times, serif;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Uploaded Batches</h2>
+
+    <p>
+        <a asp-action="Upload" class="btn btn-primary">
+            <i class="bi bi-upload"></i> Upload New Files
+        </a>
+    </p>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No files uploaded yet.</div>
+    }
+    else
+    {
+        // Group by batch ID and order by newest uploaded first
+        var grouped = Model
+        .GroupBy(f => f.UploadBatchId)
+        .OrderByDescending(g => g.Max(f => f.UploadedOn));
+
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th>No.</th>
+                        <th>Voucher Name</th>
+                        <th>Batch ID</th>
+                        <th>Files Count</th>
+                        <th>Uploaded On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var counter = 1;
+                    }
+                    @foreach (var group in grouped)
+                    {
+                        var firstFile = group.First();
+                        <tr>
+                            <td>@counter</td>
+                            <td>@firstFile.PaymentVoucher?.VoucheName</td>
+                            <td>@group.Key</td>
+                            <td>@group.Count()</td>
+                            <td>@group.Max(f => f.UploadedOn).ToString("g")</td>
+                            <td>
+                                <a asp-action="ViewBatch" asp-route-batchId="@group.Key" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-eye"></i> View Files
+                                </a>
+                                <a asp-controller="UploadedFiles" asp-action="Edit" asp-route-batchId="@group.Key"
+                                   class="btn btn-sm btn-warning me-1">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <form asp-action="BulkDelete" method="post" class="d-inline">
+                                    <input type="hidden" name="selectedIds" value="@firstFile.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                                <a asp-action="DownloadFullBatchPdf" asp-route-batchId="@group.Key"
+                                   class="btn btn-sm btn-success">
+                                    <i class="bi bi-download"></i> Download PDF
+                                </a>
+                            </td>
+                        </tr>
+                        counter++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("selectAll")?.addEventListener("change", function () {
+            let checkboxes = document.querySelectorAll(".file-checkbox");
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
+}

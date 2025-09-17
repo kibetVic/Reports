@@ -1,0 +1,84 @@
+﻿@model IEnumerable<Reports.Models.UserAccount>
+
+@{
+    ViewData["Title"] = "User Accounts";
+}
+
+<style>
+    .table tr {
+        font-size: 12px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>User Accounts</h1>
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="searchBox" class="form-control" placeholder="Search by username, email or name..." />
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Number</th>
+                    <th>@Html.DisplayNameFor(model => model.Username)</th>
+                    <th>@Html.DisplayNameFor(model => model.Email)</th>
+                    <th>Full Name</th>
+                    <th>Phone Number</th>
+                    <th>@Html.DisplayNameFor(model => model.Role)</th>
+                    <th>@Html.DisplayNameFor(model => model.CreatedAt)</th>
+                    <th>@Html.DisplayNameFor(model => model.LastLoginAt)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                @{
+                    var counter = 1;
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@counter</td>
+                        <td>@item.Username</td>
+                        <td>@item.Email</td>
+                        <td>@item.FullName</td>
+                        <td>@item.PhoneNumber</td>
+                        <td>@item.Role</td>
+                        <td>@item.CreatedAt.ToString("yyyy-MM-dd")</td>
+                        <td>@item.LastLoginAt?.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                    counter++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Client-side search filter with correct row display
+        const searchBox = document.getElementById("searchBox");
+        const tableRows = document.querySelectorAll("#userTable tr");
+
+        searchBox.addEventListener("keyup", function () {
+            const query = this.value.toLowerCase();
+            tableRows.forEach((row, index) => {
+                const rowText = Array.from(row.cells).slice(1, -1) // exclude # and actions
+                    .map(cell => cell.textContent.toLowerCase())
+                    .join(" ");
+                row.style.display = rowText.includes(query) ? "" : "none";
+            });
+        });
+    </script>
+}

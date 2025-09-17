@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4 fw-bold">Welcome to Invoice System</h1>
+        <p class="lead text-muted">Manage your vouchers, payments, and summaries with ease.</p>
+
+        <hr class="my-4" />
+
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-4 h-100">
+                    <h5 class="fw-semibold">Vouchers</h5>
+                    <p>Manage payment vouchers and items.</p>
+                    <a class="btn btn-primary" asp-controller="PaymentVouchers" asp-action="Index">Go to Vouchers</a>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-4 h-100">
+                    <h5 class="fw-semibold">Summaries</h5>
+                    <p>View and manage all Summaries.</p>
+                    <a class="btn btn-success" asp-controller="Summaries" asp-action="Index">Go to Summaries</a>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-4 h-100">
+                    <h5 class="fw-semibold">Reports</h5>
+                    <p>Visual reports and Download.</p>
+                    <a class="btn btn-info" asp-controller="PaymentVouchers" asp-action="Reports">Go to Reports</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
