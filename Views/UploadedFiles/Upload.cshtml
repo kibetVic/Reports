@@ -5,70 +5,69 @@
 
 <div class="container mt-5">
     <div class="card shadow-lg border-0 rounded-3">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="bi bi-upload me-2"></i> Upload Files</h4>
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h3 class="mb-0">Upload File Form</h3>
         </div>
 
         <div class="card-body p-4">
-            
-            <!-- ✅ Success Message -->
-            @if (TempData != null && TempData["Message"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle me-2"></i> @TempData["Message"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-
-            <!-- ✅ Error Message -->
-            @if (TempData != null && TempData["Error"] != null)
+            @if (TempData?["Error"] != null)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="bi bi-exclamation-triangle me-2"></i> @TempData["Error"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
-            
+
             <form asp-action="Upload" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 <!-- Voucher Dropdown -->
                 <div class="mb-3">
                     <label asp-for="PaymentVoucherId" class="form-label">Select Voucher</label>
-                    <select asp-for="PaymentVoucherId" class="form-select"
-                            asp-items="ViewBag.Vouchers">
+                    <select asp-for="PaymentVoucherId" class="form-select" asp-items="ViewBag.Vouchers">
                         <option value="">-- Select Voucher --</option>
                     </select>
                     <span asp-validation-for="PaymentVoucherId" class="text-danger"></span>
                 </div>
 
-                <!-- Header row -->
-                <div class="row fw-bold text-secondary border-bottom pb-2 mb-3">
-                    <div class="col-md-4">File Name</div>
-                    <div class="col-md-6">Choose File</div>
-                    <div class="col-md-2 text-center">Action</div>
-                </div>
-
-                <div id="fileUploadContainer">
-                    <!-- initial row -->
-                    <div class="row align-items-center mb-2 file-upload-row">
-                        <div class="col-md-4 mb-2 mb-md-0">
-                            <input name="FileNames" type="text" class="form-control" placeholder="Enter file name" />
+                <!-- Entry row - Modern Style -->
+                <div class="mb-4 p-3 bg-light border rounded shadow-sm">
+                    <h5 class="mb-3 text-primary"><i class="bi bi-upload me-2"></i>Add a File</h5>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">File Name</label>
+                            <input id="fileNameInput" type="text" class="form-control" placeholder="Enter file name" />
                         </div>
-                        <div class="col-md-6 mb-2 mb-md-0">
-                            <input name="Files" type="file" class="form-control" />
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">In Favour Of</label>
+                            <input id="inFavourOfInput" type="text" class="form-control" placeholder="Enter beneficiary" />
                         </div>
-                        <div class="col-md-2 d-flex justify-content-center">
-                            <button type="button" class="btn btn-outline-danger btn-sm remove-row">
-                                <i class="bi bi-trash me-1"></i> Remove
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Choose File</label>
+                            <input id="fileInput" type="file" class="form-control " />
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="button" id="addRow" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle me-1"></i> Add
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Add more rows -->
-                <div class="mb-3">
-                    <button type="button" id="addRow" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-plus-circle me-1"></i> Add a File
-                    </button>
+
+                <!-- Saved files list -->
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-light">
+                            <tr class="fw-bold text-secondary">
+                                <th class="col-12 col-sm-3">File Name</th>
+                                <th class="col-12 col-sm-3">In Favour Of</th>
+                                <th class="col-12 col-sm-4">File</th>
+                                <th class="col-12 col-sm-2 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fileUploadContainer">
+                            <!-- dynamically added rows will go here -->
+                        </tbody>
+                    </table>
                 </div>
 
                 <!-- Submit + Back -->
@@ -89,19 +88,32 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // add new row dynamically
         document.getElementById("addRow").addEventListener("click", function () {
+            const fileNameInput = document.getElementById("fileNameInput");
+            const inFavourOfInput = document.getElementById("inFavourOfInput");
+            const fileInput = document.getElementById("fileInput");
             const container = document.getElementById("fileUploadContainer");
+
+            if (!fileNameInput.value || !inFavourOfInput.value || !fileInput.files.length) {
+                alert("Please fill File Name, In Favour Of, and select a file.");
+                return;
+            }
+
+            const file = fileInput.files[0];
 
             const newRow = document.createElement("div");
             newRow.classList.add("row", "align-items-center", "mb-2", "file-upload-row");
 
             newRow.innerHTML = `
-                <div class="col-md-4 mb-2 mb-md-0">
-                    <input name="FileNames" type="text" class="form-control" placeholder="Enter file name" />
+                <div class="col-md-3">
+                    <input name="FileNames" type="text" class="form-control" value="${fileNameInput.value}" />
                 </div>
-                <div class="col-md-6 mb-2 mb-md-0">
-                    <input name="Files" type="file" class="form-control" />
+                <div class="col-md-3">
+                    <input name="InfavourOf" type="text" class="form-control" value="${inFavourOfInput.value}" />
+                </div>
+                <div class="col-md-4">
+                    <input name="Files" type="file" class="form-control d-none" />
+                    <span class="text-muted">${file.name}</span>
                 </div>
                 <div class="col-md-2 d-flex justify-content-center">
                     <button type="button" class="btn btn-outline-danger btn-sm remove-row">
@@ -110,18 +122,22 @@
                 </div>
             `;
 
+            // keep the uploaded file in hidden input
+            const hiddenFileInput = newRow.querySelector("input[name='Files']");
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            hiddenFileInput.files = dt.files;
+
             newRow.querySelector(".remove-row").addEventListener("click", function () {
                 newRow.remove();
             });
 
             container.appendChild(newRow);
-        });
 
-        // allow removing initial row too
-        document.querySelectorAll(".remove-row").forEach(btn => {
-            btn.addEventListener("click", function () {
-                btn.closest(".file-upload-row").remove();
-            });
+            // reset entry fields
+            fileNameInput.value = "";
+            inFavourOfInput.value = "";
+            fileInput.value = "";
         });
     </script>
 }

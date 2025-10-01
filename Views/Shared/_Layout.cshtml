@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"] - Invoice system</title>
+    <title>@ViewData["Title"] - Payment Management System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -35,6 +35,21 @@
     <!-- summernote -->
     <link rel="stylesheet" href="~/AdminLTE/plugins/summernote/summernote-bs4.min.css">
     <style>
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+
         .content-wrapper {
             margin-top: 0 !important;
             padding-top: 0.1rem; /* small spacing if needed */
@@ -106,12 +121,17 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <div class="container-fluid">
-                            <img src="~/images/Amtech.jfif" alt="Amtech" class="logo-img" />
+                            <img src="~/images/amtech_logo.png" alt="Amtech" class="logo-img" />
                         </div>
 
                         <!-- Dashboard: everyone can see -->
-                        <li class="nav-item">
+                        @* <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> Dashboard
+                            </a>
+                        </li> *@
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
                                 <i class="fas fa-home"></i> Dashboard
                             </a>
                         </li>
@@ -140,11 +160,11 @@
                                 <i class="fas fa-cogs"></i> SetUps
                             </a>
                             <ul class="dropdown-menu">
-                                <li>
+                                @* <li>
                                     <a class="dropdown-item" asp-controller="Venues" asp-action="Index">
                                         <i class="fas fa-building"></i> Venue
                                     </a>
-                                </li>
+                                </li> *@
                                 <li>
                                     <a class="dropdown-item" asp-controller="Counties" asp-action="Index">
                                         <i class="fas fa-map-marker-alt"></i> County
@@ -226,6 +246,127 @@
 
     <!-- Charts (shared across dashboards) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Global defaults
+        Chart.defaults.animation = false;
+        Chart.defaults.responsive = true;
+        Chart.defaults.maintainAspectRatio = false;
+        Chart.defaults.plugins.legend.position = 'bottom';
+        Chart.defaults.font.size = 12;
+
+        function renderCharts(model) {
+            if (!model) return;
+
+            // PIE (classic)
+            new Chart(document.getElementById('pieChart'), {
+                type: 'pie',
+                data: {
+                    labels: model.PaymentStatusLabels,
+                    datasets: [{
+                        data: model.PaymentStatusValues,
+                        backgroundColor: ['#4CAF50', '#F44336', '#FFC107', '#2196F3']
+                    }]
+                }
+            });
+
+            // BAR
+            new Chart(document.getElementById('barChart'), {
+                type: 'bar',
+                data: {
+                    labels: model.SummaryLabels,
+                    datasets: [{
+                        label: 'Total per County',
+                        data: model.SummaryValues,
+                        backgroundColor: '#2196F3'
+                    }]
+                }
+            });
+
+            // LINE
+            new Chart(document.getElementById('lineChart'), {
+                type: 'line',
+                data: {
+                    labels: model.VoucherDates,
+                    datasets: [{
+                        label: 'Voucher Totals',
+                        data: model.VoucherTotals,
+                        borderColor: '#4CAF50',
+                        fill: false,
+                        tension: 0
+                    }]
+                }
+            });
+
+            // SCATTER
+            new Chart(document.getElementById('scatterChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Voucher Total vs Summary Count',
+                        data: model.ScatterPoints,
+                        backgroundColor: '#F44336'
+                    }]
+                }
+            });
+
+            // MODERN DOUGHNUT
+            new Chart(document.getElementById('doughnutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: model.PaymentStatusLabels,
+                    datasets: [{
+                        data: model.PaymentStatusValues,
+                        backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    cutout: '60%',
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: {
+                            backgroundColor: '#333',
+                            titleColor: '#fff',
+                            bodyColor: '#eee'
+                        }
+                    }
+                }
+            });
+
+            // MODERN RING
+            new Chart(document.getElementById('ringChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: model.SummaryLabels,
+                    datasets: [{
+                        data: model.SummaryValues,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(54, 162, 235, 0.7)'
+                        ],
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>      
     @RenderSection("Scripts", required: false)
 </body>

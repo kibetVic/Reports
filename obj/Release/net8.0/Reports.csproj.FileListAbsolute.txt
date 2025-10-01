@@ -324,3 +324,5 @@ D:\Amtech 2025.8\Projects\Reports\Reports\bin\Release\net8.0\SixLabors.Fonts.dll
 D:\Amtech 2025.8\Projects\Reports\Reports\bin\Release\net8.0\SixLabors.ImageSharp.dll
 D:\Amtech 2025.8\Projects\Reports\Reports\bin\Release\net8.0\System.IO.Packaging.dll
 D:\Amtech 2025.8\Projects\Reports\Reports\bin\Release\net8.0\de\PdfSharpCore.resources.dll
+D:\Amtech 2025.8\Projects\Reports\Reports\bin\Release\net8.0\ExcelDataReader.dll
+D:\Amtech 2025.8\Projects\Reports\Reports\bin\Release\net8.0\ExcelDataReader.DataSet.dll

@@ -56,18 +56,17 @@ namespace Reports.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ApprovedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CheckedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ChequeNo")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("CountyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CreatedById")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
@@ -82,15 +81,20 @@ namespace Reports.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PreparedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("UserAccountId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("VenueId")
                         .HasColumnType("int");
 
                     b.Property<string>("VoucheName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VoucherNumber")
@@ -101,7 +105,7 @@ namespace Reports.Migrations
 
                     b.HasIndex("CountyId");
 
-                    b.HasIndex("CreatedById");
+                    b.HasIndex("UserAccountId");
 
                     b.HasIndex("VenueId");
 
@@ -127,7 +131,13 @@ namespace Reports.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int>("EachAmount")
+                        .HasColumnType("int");
+
                     b.Property<int>("ItemNo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MpesaCharges")
                         .HasColumnType("int");
 
                     b.Property<int>("PaymentVoucherId")
@@ -199,13 +209,26 @@ namespace Reports.Migrations
                     b.Property<decimal>("SubTotalperVenue")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("TotalMpesaChargesPerEA")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalMpesaChargesPerHall")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalMpesaChargesPerLeadFarmers")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("TotalSum")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("VenueId")
+                    b.Property<string>("Venue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("VenueId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VenueId1")
+                    b.Property<int?>("status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -217,8 +240,6 @@ namespace Reports.Migrations
                     b.HasIndex("PaymentVoucherId");
 
                     b.HasIndex("VenueId");
-
-                    b.HasIndex("VenueId1");
 
                     b.ToTable("Summaries");
                 });
@@ -241,8 +262,13 @@ namespace Reports.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(1050)
+                        .HasColumnType("nvarchar(1050)");
+
+                    b.Property<string>("InFavourOf")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("PaymentVoucherId")
                         .HasColumnType("int");
@@ -337,6 +363,23 @@ namespace Reports.Migrations
                     b.ToTable("Venues");
                 });
 
+            modelBuilder.Entity("Reports.Models.VoucherDescription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VoucherDescriptions");
+                });
+
             modelBuilder.Entity("Reports.Models.VoucherImage", b =>
                 {
                     b.Property<int>("Id")
@@ -366,17 +409,13 @@ namespace Reports.Migrations
                         .WithMany("PaymentVouchers")
                         .HasForeignKey("CountyId");
 
-                    b.HasOne("Reports.Models.UserAccount", "CreatedBy")
+                    b.HasOne("Reports.Models.UserAccount", null)
                         .WithMany("CreatedVouchers")
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("UserAccountId");
 
                     b.HasOne("Reports.Models.Venue", null)
                         .WithMany("PaymentVouchers")
                         .HasForeignKey("VenueId");
-
-                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("Reports.Models.PaymentVoucherItem", b =>
@@ -408,19 +447,11 @@ namespace Reports.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Reports.Models.Venue", "Venue")
-                        .WithMany()
-                        .HasForeignKey("VenueId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Reports.Models.Venue", null)
                         .WithMany("Summaries")
-                        .HasForeignKey("VenueId1");
+                        .HasForeignKey("VenueId");
 
                     b.Navigation("County");
-
-                    b.Navigation("Venue");
 
                     b.Navigation("Voucher");
                 });

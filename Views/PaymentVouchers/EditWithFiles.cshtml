@@ -1,0 +1,309 @@
+﻿@model Reports.Models.PaymentVoucherEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Payment Voucher With Files";
+}
+
+<div class="container mt-4">
+    <form asp-action="EditWithFiles" method="post" enctype="multipart/form-data">
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error:</strong> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @* Standard validation summary *@
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-warning">
+                <h6>Model state details (debug):</h6>
+                <ul class="mb-0">
+                    @foreach (var kvp in ViewData.ModelState)
+                    {
+                        var key = kvp.Key;
+                        foreach (var err in kvp.Value.Errors)
+                        {
+                            <li><strong>@(string.IsNullOrEmpty(key) ? "(model-level)" : key):</strong> @err.ErrorMessage</li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+
+        <input type="hidden" asp-for="PaymentVoucher.PaymentVoucherId" />
+
+        <div class="card shadow-lg rounded-3 mb-4">
+            <div class="card-header bg-primary text-white text-center">
+                <h3 class="mb-0">Payment Voucher</h3>
+            </div>
+            <div class="card-body">
+                <!-- Voucher Info -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.VoucheName" class="form-label fw-bold"></label>
+                        <input asp-for="PaymentVoucher.VoucheName" class="form-control" />
+                        <span asp-validation-for="PaymentVoucher.VoucheName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.PaymentMode" class="form-label fw-bold"></label>
+                        <select asp-for="PaymentVoucher.PaymentMode" class="form-select">
+                            <option value="M-pesa" selected="@(Model.PaymentVoucher.PaymentMode == "M-pesa")">M-pesa</option>
+                            <option value="Cash" selected="@(Model.PaymentVoucher.PaymentMode == "Cash")">Cash</option>
+                        </select>
+                        <span asp-validation-for="PaymentVoucher.PaymentMode" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.PaymentInFavourOf" class="form-label fw-bold"></label>
+                        <input asp-for="PaymentVoucher.PaymentInFavourOf" class="form-control" />
+                        <span asp-validation-for="PaymentVoucher.PaymentInFavourOf" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Voucher Items -->
+                <h4 class="mt-4">Voucher Items</h4>
+                <div class="row mb-3 border p-3 rounded bg-light">
+                    <div class="col-md-2">
+                        <input id="newItemNo" class="form-control" type="number" placeholder="Item No" />
+                    </div>
+                    <div class="col-md-2">
+                        <input id="newEachAmount" class="form-control" type="number" placeholder="Each Amount" />
+                    </div>
+                    <div class="col-md-2">
+                        <input id="newMpesaCharges" class="form-control" type="number" placeholder="M-Pesa Charges" />
+                    </div>
+                    <div class="col-md-3">
+                        <select id="newDescriptionSelect" class="form-select" onchange="toggleCustomDescription()">
+                            <option value="">-- Select Description --</option>
+                            @foreach (var desc in ViewBag.VoucherDescriptions as List<string>)
+                            {
+                                <option value="@desc">@desc</option>
+                            }
+                            <option value="__custom__">➕ Others</option>
+                        </select>
+                        <input id="newDescription" class="form-control mt-2 d-none" placeholder="Custom description" />
+                    </div>
+                    <div class="col-md-1">
+                        <input id="newCts" class="form-control" type="number" placeholder="Cts" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-success w-100" onclick="addItem()">+ Add</button>
+                    </div>
+                </div>
+
+                <table class="table table-bordered" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Each</th>
+                            <th>Charges</th>
+                            <th>Description</th>
+                            <th>Cts</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Items.Count; i++)
+                        {
+                            <tr>
+                                <td><input name="Items[@i].ItemNo" class="form-control" value="@Model.Items[i].ItemNo" /></td>
+                                <td><input name="Items[@i].EachAmount" class="form-control" value="@Model.Items[i].EachAmount" /></td>
+                                <td><input name="Items[@i].MpesaCharges" class="form-control" value="@Model.Items[i].MpesaCharges" /></td>
+                                <td><textarea name="Items[@i].Description" class="form-control">@Model.Items[i].Description</textarea></td>
+                                <td><input name="Items[@i].Cts" class="form-control" value="@Model.Items[i].Cts" /></td>
+                                <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Remove</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FILES SECTION -->
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h3 class="mb-0">Files</h3>
+            </div>
+            <div class="card-body p-4">
+                <!-- Existing Files -->
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>In Favour Of</th>
+                            <th>File</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.ExistingFiles.Count; i++)
+                        {
+                            var file = Model.ExistingFiles[i];
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="ExistingIds" value="@file.Id" />
+                                    <input name="ExistingNames" value="@file.FileName" class="form-control" />
+                                </td>
+                                <td><input name="ExistingInfavourOf" value="@file.InFavourOf" class="form-control" /></td>
+                                <td>
+                                    @if (file.FileType == "Image")
+                                    {
+                                        <img src="@file.FilePath" width="80" />
+                                    }
+                                    else
+                                    {
+                                        <a href="@file.FilePath" target="_blank">View</a>
+                                    }
+                                    <input type="file" name="ReplaceFiles" class="form-control mt-1" />
+                                </td>
+                                <td>@file.UploadedOn.ToString("g")</td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeExistingFile(this, '@file.Id')">
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Add New Files -->
+                <div class="mb-4 bg-light p-3 rounded">
+                    <h5>Add New File</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3"><input id="fileNameInput" type="text" class="form-control" placeholder="File Name" /></div>
+                        <div class="col-md-3"><input id="inFavourOfInput" type="text" class="form-control" placeholder="Beneficiary" /></div>
+                        <div class="col-md-4"><input id="fileInput" type="file" class="form-control" /></div>
+                        <div class="col-md-2"><button type="button" id="addRow" class="btn btn-success w-100">Add</button></div>
+                    </div>
+                </div>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr><th>Name</th><th>Favour</th><th>File</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="fileUploadContainer"></tbody>
+                </table>
+            </div>
+            <!-- PREPARED / CHECKED / APPROVED SECTION -->
+            <div class="card shadow-lg border-0 rounded-3 mb-4">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0">Authorization</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="PaymentVoucher.PreparedBy" class="form-label fw-bold">Prepared By</label>
+                            <input asp-for="PaymentVoucher.PreparedBy" class="form-control" placeholder="Victor Kibet" />
+                            <span asp-validation-for="PaymentVoucher.PreparedBy" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="PaymentVoucher.CheckedBy" class="form-label fw-bold">Checked By</label>
+                            <input asp-for="PaymentVoucher.CheckedBy" class="form-control" placeholder="John Emali" />
+                            <span asp-validation-for="PaymentVoucher.CheckedBy" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="PaymentVoucher.ApprovedBy" class="form-label fw-bold">Approved By</label>
+                            <input asp-for="PaymentVoucher.ApprovedBy" class="form-control" placeholder="Pius Sigei" />
+                            <span asp-validation-for="PaymentVoucher.ApprovedBy" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-success">💾 Update</button>
+            <a asp-action="Index" class="btn btn-secondary">⬅ Back</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let itemIndex = @Model.Items?.Count ?? 0;
+
+        function toggleCustomDescription() {
+            const select = document.getElementById("newDescriptionSelect");
+            const input = document.getElementById("newDescription");
+            if (select.value === "__custom__") {
+                input.classList.remove("d-none");
+                input.value = "";
+            } else {
+                input.classList.add("d-none");
+                input.value = select.value;
+            }
+        }
+
+        function addItem() {
+            const itemNo = document.getElementById("newItemNo").value;
+            const eachAmount = document.getElementById("newEachAmount").value;
+            const mpesaCharges = document.getElementById("newMpesaCharges").value;
+            const desc = document.getElementById("newDescription").value;
+            const cts = document.getElementById("newCts").value;
+
+            if (!itemNo || !eachAmount || !desc) {
+                alert("Fill Item No, Amount, and Description");
+                return;
+            }
+
+            const tbody = document.querySelector("#itemsTable tbody");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input name="Items[${itemIndex}].ItemNo" value="${itemNo}" class="form-control" /></td>
+                <td><input name="Items[${itemIndex}].EachAmount" value="${eachAmount}" class="form-control" /></td>
+                <td><input name="Items[${itemIndex}].MpesaCharges" value="${mpesaCharges}" class="form-control" /></td>
+                <td><textarea name="Items[${itemIndex}].Description" class="form-control">${desc}</textarea></td>
+                <td><input name="Items[${itemIndex}].Cts" value="${cts}" class="form-control" /></td>
+                <td><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Remove</button></td>`;
+            tbody.appendChild(row);
+            itemIndex++;
+        }
+
+        function removeItem(btn) {
+            btn.closest("tr").remove();
+        }
+
+        function removeExistingFile(btn, fileId) {
+            // Mark the file for deletion by adding a hidden input
+            const form = btn.closest("form");
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.name = "FilesToDelete"; // <-- controller must bind this
+            hidden.value = fileId;
+            form.appendChild(hidden);
+
+            // Remove the row visually
+            btn.closest("tr").remove();
+        }
+
+        document.getElementById("addRow").addEventListener("click", function () {
+            const fn = document.getElementById("fileNameInput");
+            const fav = document.getElementById("inFavourOfInput");
+            const file = document.getElementById("fileInput");
+            if (!fn.value || !fav.value || !file.files.length) {
+                alert("Fill all file fields");
+                return;
+            }
+            const f = file.files[0];
+            const container = document.getElementById("fileUploadContainer");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input name="NewFileNames" value="${fn.value}" class="form-control" /></td>
+                <td><input name="NewInFavourOf" value="${fav.value}" class="form-control" /></td>
+                <td><input type="file" name="NewFiles" class="form-control d-none" /><span>${f.name}</span></td>
+                <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>`;
+            const hidden = row.querySelector("input[name='NewFiles']");
+            const dt = new DataTransfer();
+            dt.items.add(f);
+            hidden.files = dt.files;
+            container.appendChild(row);
+
+            fn.value = ""; fav.value = ""; file.value = "";
+        });
+    </script>
+}

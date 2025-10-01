@@ -4,129 +4,176 @@
 }
 
 <div class="container mt-4">
-    <h2 class="mb-4">Edit Files</h2>
-
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success">@TempData["Message"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
-
-    <form asp-controller="UploadedFiles"
-          asp-action="Edit"
-          asp-route-batchId="@ViewBag.BatchId"
-          method="post"
-          enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
-
-        @* <!-- Voucher Dropdown -->
-        <div class="mb-3">
-            <label asp-for="PaymentVoucherId" class="form-label">Select Voucher</label>
-            <select asp-for="PaymentVoucherId" class="form-control"
-                    asp-items="ViewBag.Vouchers">
-            </select>
-        </div> *@
-
-        <!-- Voucher Dropdown -->
-        <div class="mb-3">
-            <label asp-for="PaymentVoucherId" class="form-label">Select Voucher</label>
-            <select asp-for="PaymentVoucherId" class="form-select"
-                    asp-items="ViewBag.Vouchers">
-                <option value="">-- Select Voucher --</option>
-            </select>
-            <span asp-validation-for="PaymentVoucherId" class="text-danger"></span>
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h3 class="mb-0">Upload File Form</h3>
         </div>
 
-        <!-- Existing Files -->
-        <table class="table table-bordered mb-4">
-            <thead class="table-light">
-                <tr>
-                    <th style="width: 30%">File Name</th>
-                    <th style="width: 40%">Preview / Replace</th>
-                    <th style="width: 20%">Uploaded On</th>
-                    <th style="width: 10%">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var file in Model.ExistingFiles)
-                {
-                    <tr>
-                        <td>
-                            <input type="hidden" name="existingIds" value="@file.Id" />
-                            <input type="text" name="existingNames" value="@file.FileName" class="form-control" />
-                        </td>
-                        <td>
-                            @if (file.FileType == "Image")
+        <div class="card-body p-4">
+            @if (TempData?["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form asp-controller="UploadedFiles"
+                  asp-action="Edit"
+                  asp-route-batchId="@ViewBag.BatchId"
+                  method="post"
+                  enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <!-- Voucher Dropdown -->
+                <div class="mb-3">
+                    <label asp-for="PaymentVoucherId" class="form-label">Select Voucher</label>
+                    <select asp-for="PaymentVoucherId" class="form-select" asp-items="ViewBag.Vouchers">
+                        <option value="">-- Select Voucher --</option>
+                    </select>
+                    <span asp-validation-for="PaymentVoucherId" class="text-danger"></span>
+                </div>
+
+                <!-- Existing Files -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-light">
+                            <tr class="fw-bold text-secondary">
+                                <th>File Name</th>
+                                <th>In Favour Of</th>
+                                <th>File uploaded</th>
+                                <th>Uploaded On</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var file in Model.ExistingFiles)
                             {
-                                <img src="@file.FilePath" width="80" class="img-thumbnail mb-1" />
+                                <tr>
+                                    <td>
+                                        <input type="hidden" name="existingIds" value="@file.Id" />
+                                        <input type="text" name="existingNames" value="@file.FileName" class="form-control form-control-sm" />
+                                    </td>
+                                    <td>
+                                        <input type="text" name="existingInfavourOf" value="@file.InFavourOf" class="form-control form-control-sm mb-1"/>
+                                    </td>
+                                    <td>
+                                        @if (file.FileType == "Image")
+                                        {
+                                            <img src="@file.FilePath" width="80" class="img-thumbnail" />
+                                        }
+                                        else
+                                        {
+                                            <a href="@file.FilePath" target="_blank">View Document</a>
+                                        }
+                                        <input type="file" name="replaceFiles" class="form-control form-control-sm mt-1" />
+                                    </td>
+                                    <td>@file.UploadedOn.ToString("g")</td>
+                                    <td class="text-center">
+                                        <button type="submit"
+                                                formaction="@Url.Action("DeleteFile", "UploadedFiles", new { id = file.Id })"
+                                                formmethod="post"
+                                                class="btn btn-sm btn-danger"">
+                                            <i class="bi bi-trash">Delete</i>
+                                        </button>
+                                    </td>
+                                </tr>
                             }
-                            else
-                            {
-                                <a href="@file.FilePath" target="_blank">View Document</a>
-                            }
-                            <br />
-                            <input type="file" name="replaceFiles" class="form-control mt-1" />
-                        </td>
-                        <td>@file.UploadedOn.ToString("g")</td>
-                        <td>
-                            <button type="submit"
-                                    formaction="@Url.Action("DeleteFile", "UploadedFiles", new { id = file.Id })"
-                                    formmethod="post"
-                                    class="btn btn-sm btn-danger"
-                                    onclick="return confirm('Delete this file?');">
-                                <i class="bi bi-trash"></i> Delete
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add New Files - Modern Style -->
+                <div class="mb-4 p-3 bg-light border rounded shadow-sm">
+                    <h5 class="mb-3 text-primary"><i class="bi bi-upload me-2"></i>Add New File</h5>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">File Name</label>
+                            <input id="fileNameInput" type="text" class="form-control" placeholder="Enter file name" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">In Favour Of</label>
+                            <input id="inFavourOfInput" type="text" class="form-control" placeholder="Enter beneficiary" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Choose File</label>
+                            <input id="fileInput" type="file" class="form-control" />
+                        </div>
+                        <div class="col-md-2 d-grid">
+                            <button type="button" id="addRow" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle me-1"></i> Add
                             </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Add new files -->
-        <div class="row mb-2 fw-bold">
-            <div class="col-md-4">File Name</div>
-            <div class="col-md-6">Choose File</div>
-            <div class="col-md-2"></div>
+                <!-- Container for dynamically added files -->
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-light">
+                            <tr class="fw-bold text-secondary">
+                                <th>File Name</th>
+                                <th>Favour To</th>
+                                <th>File</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fileUploadContainer"></tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Changes</button>
+                </div>
+            </form>
         </div>
-        <div id="fileUploadContainer"></div>
-
-        <button type="button" id="addRow" class="btn btn-outline-primary btn-sm mb-3">
-            <i class="bi bi-plus-circle"></i> Add a file
-        </button>
-
-        <div class="d-flex justify-content-between mt-3">
-            <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Back</a>
-            <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save Changes</button>
-        </div>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
     <script>
         document.getElementById("addRow").addEventListener("click", function () {
+            const fileNameInput = document.getElementById("fileNameInput");
+            const inFavourOfInput = document.getElementById("inFavourOfInput");
+            const fileInput = document.getElementById("fileInput");
             const container = document.getElementById("fileUploadContainer");
-            const newRow = document.createElement("div");
-            newRow.classList.add("row", "mb-2");
 
+            if (!fileNameInput.value || !inFavourOfInput.value || !fileInput.files.length) {
+                alert("Please fill File Name, In Favour Of, and select a file.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            const newRow = document.createElement("tr");
             newRow.innerHTML = `
-                <div class="col-md-4">
-                    <input name="newFileNames" type="text" class="form-control" placeholder="Enter file name" />
-                </div>
-                <div class="col-md-6">
-                    <input name="newFiles" type="file" class="form-control" />
-                </div>
-                <div class="col-md-2 d-flex align-items-center">
-                    <button type="button" class="btn btn-outline-danger btn-sm w-100 remove-row">
+                <td><input name="newFileNames" type="text" class="form-control form-control-sm" value="${fileNameInput.value}" /></td>
+                <td><input name="newInfavourOf" type="text" class="form-control form-control-sm" value="${inFavourOfInput.value}" /></td>
+                <td>
+                    <input name="newFiles" type="file" class="form-control d-none" />
+                    <span class="text-muted">${file.name}</span>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-row">
                         <i class="bi bi-trash me-1"></i> Remove
                     </button>
-                </div>
+                </td>
             `;
+
+            // keep the uploaded file in hidden input
+            const hiddenFileInput = newRow.querySelector("input[name='newFiles']");
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            hiddenFileInput.files = dt.files;
 
             newRow.querySelector(".remove-row").addEventListener("click", () => newRow.remove());
             container.appendChild(newRow);
+
+            // reset entry fields
+            fileNameInput.value = "";
+            inFavourOfInput.value = "";
+            fileInput.value = "";
         });
     </script>
 }

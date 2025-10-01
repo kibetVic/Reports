@@ -14,6 +14,8 @@ namespace Reports.Models
 
         [Required]
         public int ItemNo { get; set; }
+        public int EachAmount { get; set; }
+        public int MpesaCharges { get; set; }
 
         [Required]
         [StringLength(500)]
@@ -22,7 +24,8 @@ namespace Reports.Models
         [Required]
         [DataType(DataType.Currency)]
         public decimal Amount { get; set; }
-
+        [NotMapped]
+        public decimal? VAT { get; set; }
         public int Cts { get; set; } = 0;
     }
 }

@@ -1,0 +1,284 @@
+﻿@model Reports.Models.PaymentVoucherWithFilesViewModel
+@{
+    ViewData["Title"] = "Create Payment Voucher & Upload Files";
+}
+
+<style>
+    .table td,
+    .table th {
+        padding: 4px 8px !important; /* reduce vertical & horizontal padding */
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    .table tbody tr {
+        height: auto !important; /* let rows shrink naturally */
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="card shadow-lg rounded-3">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">Payment Voucher & Upload Files</h3>
+        </div>
+        <div class="card-body">
+            <form asp-controller="PaymentVouchers" asp-action="CreateWithFiles" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="PaymentVoucher.PaymentVoucherId" />
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                <!-- ================= Voucher Info ================= -->
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Voucher Number</label>
+                        <input type="text" id="voucherNumber" name="PaymentVoucher.VoucherNumber"
+                               class="form-control" placeholder="Enter voucher No:2025/9/25." onblur="fetchVoucherData()" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.PaymentMode" class="form-label fw-bold">Payment Mode</label>
+                        <select asp-for="PaymentVoucher.PaymentMode" class="form-select">
+                            <option value="M-pesa">M-pesa</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.PaymentInFavourOf" class="form-label fw-bold">Payment In Favour Of</label>
+                        <input asp-for="PaymentVoucher.PaymentInFavourOf" class="form-control" placeholder="Beneficiary..." />
+                    </div>
+                </div>
+
+                <!-- ================= Voucher Items ================= -->
+                <h4 class="mt-4">Voucher Items</h4>
+                <div class="row mb-3 border p-3 rounded bg-light">
+                    <div class="col-md-2">
+                        <label class="form-label">Item Number</label>
+                        <input id="newItemNo" class="form-control" type="number" placeholder="1, 2, 3,..." />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Each Amount</label>
+                        <input id="newEachAmount" class="form-control" type="number" step="0.01" placeholder="500, 3000,..." />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">M-Pesa Charges</label>
+                        <input id="newMpesaCharges" class="form-control" type="number" step="0.01" placeholder="5, 9, 13, ..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Description</label>
+                        <select id="newDescriptionSelect" class="form-select" onchange="toggleCustomDescription()">
+                            <option value="">-- Select Description --</option>
+                            @foreach (var desc in ViewBag.VoucherDescriptions as List<string>)
+                            {
+                                <option value="@desc">@desc</option>
+                            }
+                            <option value="__custom__" class="custom-option">➕ Others</option>
+                        </select>
+                        <input id="newDescription" class="form-control mt-2 d-none" placeholder="Enter custom description..." />
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Cts</label>
+                        <input id="newCts" class="form-control" type="number" step="1" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-success w-100" onclick="addItem()">+ Add Item</button>
+                    </div>
+                </div>
+
+                <table class="table table-bordered table-striped align-middle mt-3" id="itemsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Item Number</th>
+                            <th>Each Amount</th>
+                            <th>M-Pesa Charges</th>
+                            <th>Description</th>
+                            <th>Cts</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <!-- ================= File Upload ================= -->
+                <h4 class="mt-4">Upload Files</h4>
+                <br>
+                <div class="row g-3 align-items-end mb-3 p-3 bg-light border rounded shadow-sm">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">File Name</label>
+                        <input id="fileNameInput" type="text" class="form-control" placeholder="Enter file name" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">In Favour Of</label>
+                        <input id="inFavourOfInput" type="text" class="form-control" placeholder="Enter beneficiary" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Choose File</label>
+                        <input id="fileInput" type="file" class="form-control" />
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="button" id="addFileRow" class="btn btn-success w-100">
+                            <i class="bi bi-plus-circle me-1"></i> Add
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>File Name</th>
+                                <th>In Favour Of</th>
+                                <th>File</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fileUploadContainer"></tbody>
+                    </table>
+                </div>
+
+                <!-- ================= Prepared / Checked / Approved ================= -->
+                <div class="row mb-3 mt-4">
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.PreparedBy" class="form-label fw-bold">Prepared By</label>
+                        <input asp-for="PaymentVoucher.PreparedBy" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.CheckedBy" class="form-label fw-bold">Checked By</label>
+                        <input asp-for="PaymentVoucher.CheckedBy" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="PaymentVoucher.ApprovedBy" class="form-label fw-bold">Approved By</label>
+                        <input asp-for="PaymentVoucher.ApprovedBy" class="form-control" />
+                    </div>
+                </div>
+
+                <!-- ================= Submit ================= -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary px-4">Save Voucher & Files</button>
+                    <a asp-action="Index" class="btn btn-secondary px-4">⬅ Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // ========= Voucher Items =========
+        let itemIndex = 0;
+        function toggleCustomDescription() {
+            const select = document.getElementById("newDescriptionSelect");
+            const input = document.getElementById("newDescription");
+            select.value === "__custom__" ? input.classList.remove("d-none") : input.classList.add("d-none");
+        }
+        function addItem() {
+            const itemNo = document.getElementById("newItemNo").value;
+            const eachAmount = document.getElementById("newEachAmount").value;
+            const mpesaCharges = document.getElementById("newMpesaCharges").value;
+            const descriptionSelect = document.getElementById("newDescriptionSelect");
+            const descriptionInput = document.getElementById("newDescription");
+            const description = descriptionSelect.value === "__custom__" ? descriptionInput.value : descriptionSelect.value;
+            const cts = document.getElementById("newCts").value;
+
+            if (!itemNo || !eachAmount || !description) { alert("Fill required fields"); return; }
+
+            const tbody = document.querySelector("#itemsTable tbody");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input name="Items[${itemIndex}].ItemNo" class="form-control" type="number" value="${itemNo}" readonly /></td>
+                <td><input name="Items[${itemIndex}].EachAmount" class="form-control" type="number" step="0.01" value="${eachAmount}" readonly /></td>
+                <td><input name="Items[${itemIndex}].MpesaCharges" class="form-control" type="number" step="0.01" value="${mpesaCharges}" readonly /></td>
+                <td><textarea name="Items[${itemIndex}].Description" class="form-control" rows="1" readonly>${description}</textarea></td>
+                <td><input name="Items[${itemIndex}].Cts" class="form-control" type="number" step="1" value="${cts}" readonly /></td>
+                <td class="text-center"><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+
+            // Add custom description to dropdown
+            if (descriptionSelect.value === "__custom__" && descriptionInput.value.trim() !== "") {
+                const newOption = document.createElement("option");
+                newOption.value = descriptionInput.value;
+                newOption.text = descriptionInput.value;
+                descriptionSelect.add(newOption, descriptionSelect.options.length - 1);
+            }
+
+            itemIndex++;
+            ["newItemNo","newEachAmount","newMpesaCharges","newDescriptionSelect","newDescription","newCts"].forEach(id => document.getElementById(id).value = "");
+            descriptionInput.classList.add("d-none");
+            descriptionSelect.value = "";
+        }
+
+        // ========= File Upload =========
+        document.getElementById("addFileRow").addEventListener("click", function () {
+            const fileNameInput = document.getElementById("fileNameInput");
+            const inFavourOfInput = document.getElementById("inFavourOfInput");
+            const fileInput = document.getElementById("fileInput");
+            const container = document.getElementById("fileUploadContainer");
+            if (!fileNameInput.value || !inFavourOfInput.value || !fileInput.files.length) { alert("Fill all fields"); return; }
+
+            const file = fileInput.files[0];
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td><input name="FileNames" type="text" class="form-control" value="${fileNameInput.value}" /></td>
+                <td><input name="InfavourOf" type="text" class="form-control" value="${inFavourOfInput.value}" /></td>
+                <td><input name="Files" type="file" class="form-control d-none" /> <span>${file.name}</span></td>
+                <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm remove-row">Remove</button></td>
+            `;
+            const hiddenFileInput = newRow.querySelector("input[name='Files']");
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            hiddenFileInput.files = dt.files;
+
+            newRow.querySelector(".remove-row").addEventListener("click", () => newRow.remove());
+            container.appendChild(newRow);
+
+            fileNameInput.value = "";
+            inFavourOfInput.value = "";
+            fileInput.value = "";
+        });
+        //Fetch the voucher number if exist?
+        async function fetchVoucherData() {
+            let number = document.getElementById("voucherNumber").value.trim();
+            if (!number) return;
+
+            try {
+                let response = await fetch(`/PaymentVouchers/GetVoucherByNumber?voucherNumber=${encodeURIComponent(number)}`);
+                if (!response.ok) {
+                    console.log("Voucher not found, creating new.");
+                    return; // no auto-fill
+                }
+
+                let data = await response.json();
+
+                // Fill form fields
+                document.querySelector("[name='PaymentVoucher.Date']").value = data.date?.split("T")[0] || "";
+                document.querySelector("[name='PaymentVoucher.ChequeNo']").value = data.chequeNo || "";
+                document.querySelector("[name='PaymentVoucher.TotalAmount']").value = data.totalAmount || "";
+                document.querySelector("[name='PaymentVoucher.AmountInWords']").value = data.amountInWords || "";
+
+                // Clear items table then refill
+                let itemsTable = document.getElementById("itemsTableBody");
+                itemsTable.innerHTML = "";
+                data.items.forEach(i => {
+                    let row = `<tr>
+                        <td>${i.itemNo}</td>
+                        <td>${i.description}</td>
+                        <td>${i.eachAmount}</td>
+                        <td>${i.mpesaCharges}</td>
+                        <td>${i.amount}</td>
+                    </tr>`;
+                    itemsTable.innerHTML += row;
+                });
+
+                // TODO: also reload files preview list if you display uploaded files
+            }
+            catch (err) {
+                console.error("Error loading voucher:", err);
+            }
+        }
+    </script>
+}

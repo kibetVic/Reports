@@ -16,15 +16,21 @@ namespace Reports.Models
         [Required]
         [MaxLength(255)]
         public string? FileName { get; set; }
+        [Required]
+        [MaxLength(255)]
+        public string? InFavourOf { get; set; }
 
         [Required]
         public string? FilePath { get; set; }
 
-        [MaxLength(50)]
+        [MaxLength(1050)]
         public string? FileType { get; set; } 
 
         public DateTime UploadedOn { get; set; } = DateTime.Now;
         [Required]
         public string? UploadBatchId { get; set; }
+
+        [NotMapped]
+        public bool FileExists { get; set; }
     }
 }

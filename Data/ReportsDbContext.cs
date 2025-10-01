@@ -15,8 +15,8 @@ namespace Reports.Data
         public DbSet<UploadedFile> UploadedFiles { get; set; }
         public DbSet<PaymentVoucherItem> PaymentVoucherItems { get; set; }
         public DbSet<VoucherImage> VoucherImages { get; set; }
-        public DbSet<UserAccount> UserAccounts { get; set; }   // ✅ Added
-
+        public DbSet<UserAccount> UserAccounts { get; set; }
+        public DbSet<VoucherDescription> VoucherDescriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,11 +37,11 @@ namespace Reports.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- Summary -> Venue (N:1)
-            modelBuilder.Entity<Summary>()
-                .HasOne(s => s.Venue)
-                .WithMany()
-                .HasForeignKey(s => s.VenueId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Summary>()
+            //    .HasOne(s => s.Venue)
+            //    .WithMany()
+            //    .HasForeignKey(s => s.VenueId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             // --- Summary -> County (N:1)
             modelBuilder.Entity<Summary>()
@@ -51,17 +51,17 @@ namespace Reports.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // --- PaymentVoucher -> CreatedBy (N:1 with UserAccount)
-            modelBuilder.Entity<PaymentVoucher>()
-                .HasOne(v => v.CreatedBy)
-                .WithMany(u => u.CreatedVouchers)
-                .HasForeignKey(v => v.CreatedById)
-                .OnDelete(DeleteBehavior.Restrict); // prevent cascade delete of user wiping vouchers
+            //modelBuilder.Entity<PaymentVoucher>()
+            //    .HasOne(v => v.CreatedBy)
+            //    .WithMany(u => u.CreatedVouchers)
+            //    .HasForeignKey(v => v.CreatedById)
+            //    .OnDelete(DeleteBehavior.Restrict); // prevent cascade delete of user wiping vouchers
 
-            modelBuilder.Entity<PaymentVoucher>()
-                .HasOne(v => v.CreatedBy)
-                .WithMany(u => u.CreatedVouchers)
-                .HasForeignKey(v => v.CreatedById)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<PaymentVoucher>()
+            //    .HasOne(v => v.CreatedBy)
+            //    .WithMany(u => u.CreatedVouchers)
+            //    .HasForeignKey(v => v.CreatedById)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

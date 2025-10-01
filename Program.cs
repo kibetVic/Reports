@@ -5,6 +5,9 @@ using Reports.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add this line
+System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 //builder.Services.AddSingleton<PdfCombinerService>();

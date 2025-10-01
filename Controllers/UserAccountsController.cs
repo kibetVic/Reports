@@ -284,7 +284,7 @@ namespace Reports.Controllers
             TempData["Success"] = $"Welcome back, {user.FullName ?? user.Username}!";
 
             // Redirect based on role
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Dashboard");
         }
 
         // ----------------------
@@ -351,6 +351,13 @@ namespace Reports.Controllers
 
             TempData["Message"] = "Password has been reset successfully. You can now log in.";
             return RedirectToAction("Login");
+        }
+
+        // GET: /Account/AccessDenied
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

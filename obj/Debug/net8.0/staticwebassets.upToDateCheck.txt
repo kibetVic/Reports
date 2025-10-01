@@ -2318,7 +2318,6 @@ wwwroot\AdminLTE\plugins\uplot\uPlot.iife.min.js
 wwwroot\AdminLTE\plugins\uplot\uPlot.min.css
 wwwroot\css\site.css
 wwwroot\favicon.ico
-wwwroot\images\Amtech.jfif
 wwwroot\images\amtech_logo.png
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
@@ -2378,8 +2377,61 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\signatures\approved_by.png
+wwwroot\signatures\checked_by.png
+wwwroot\signatures\prepared_by.png
+wwwroot\uploads\05afd9e4-2037-4c1e-9905-e8e13369ec85_0p.png
+wwwroot\uploads\07447b3c-7654-430f-bc9e-2b858002f9de.pdf
+wwwroot\uploads\077aaccb-f54c-44ce-8bc4-4b8d2c9d95c2_00p.png
+wwwroot\uploads\077aaccb-f54c-44ce-8bc4-4b8d2c9d95c2_0p.png
+wwwroot\uploads\077aaccb-f54c-44ce-8bc4-4b8d2c9d95c2_PaymentReportTest.pdf
+wwwroot\uploads\08b8faf0-9628-4c56-b2ee-c133c26002aa_0p.png
+wwwroot\uploads\09d50425-9b53-4de2-a3e7-a4e4da02635f.xlsx
+wwwroot\uploads\118a11eb-ccf8-4856-bca8-3332e0f2210b_Kaboro SDA Church Receipt 23.09.2025.pdf
+wwwroot\uploads\118a11eb-ccf8-4856-bca8-3332e0f2210b_UPEC Kipsiorori Receipt .pdf
+wwwroot\uploads\1356a93b-7858-46e2-90e0-6d66082cb923.pdf
+wwwroot\uploads\22296696-111d-4190-8e8a-7623f8c353bd_22-08-25.xlsx
+wwwroot\uploads\22296696-111d-4190-8e8a-7623f8c353bd_Maraba Holy Family Church Receipt 22.09.2025.pdf
+wwwroot\uploads\22296696-111d-4190-8e8a-7623f8c353bd_Mogoiwo Catholic Church Receipt 22.09.2025.pdf
+wwwroot\uploads\266c2aff-e4e6-4926-bd3f-dde784b2e94b_0p.png
+wwwroot\uploads\2951d613-a386-4961-aa02-62eee38a95df.pdf
+wwwroot\uploads\2966030f-f4b9-4207-bb70-5510e242ba88_00p.png
+wwwroot\uploads\2966030f-f4b9-4207-bb70-5510e242ba88_0p.png
+wwwroot\uploads\2966030f-f4b9-4207-bb70-5510e242ba88_Computer_Science_details.pdf
+wwwroot\uploads\2a62d946-dcd0-4954-9e89-fdab9a885ba6.pdf
+wwwroot\uploads\3a2511d3-bf1a-4898-988e-7d6f3837f916_AIC Kariebu Receipt 23.09.2025.pdf
+wwwroot\uploads\3a2511d3-bf1a-4898-988e-7d6f3837f916_AIC MOSOMBOR 25.09.2025.pdf
+wwwroot\uploads\3a2511d3-bf1a-4898-988e-7d6f3837f916_Kabinderem Catholic Receipt 25.09.2025.pdf
+wwwroot\uploads\3a2511d3-bf1a-4898-988e-7d6f3837f916_Lelget PAG Receipt 25.09.2025.pdf
+wwwroot\uploads\3a2511d3-bf1a-4898-988e-7d6f3837f916_Ruki Resort Receipt 25.09.2025 (1).pdf
+wwwroot\uploads\3a2511d3-bf1a-4898-988e-7d6f3837f916_St Joseph Simbi Receipt 25.09.2025.pdf
+wwwroot\uploads\49e47a8d-2228-4cdf-92a9-72cfe7a7cfd9_0p.png
+wwwroot\uploads\4a02af04-ec5e-4383-b107-475da5262c2d_0p.png
+wwwroot\uploads\51a62786-e86b-4a87-bdbd-a2fc997c473f.png
+wwwroot\uploads\59145adc-a15e-425d-a43f-463419915878_0p.png
 wwwroot\uploads\59f8ce2a-dc70-4f8e-bca1-aeabad041dd9.pdf
+wwwroot\uploads\5bd74975-efd5-48fd-93c7-1c482a6966db.png
+wwwroot\uploads\690c8ea7-6b02-41cb-8b2d-36884235f682.pdf
 wwwroot\uploads\6e13bd9e-b922-4a07-9420-5b0570b38cfc.pdf
-wwwroot\uploads\9bf0e789-9e23-484e-aee1-b020f60acf90.png
+wwwroot\uploads\767f1cd5-7861-4a72-baef-23eaba2fb99f.png
+wwwroot\uploads\871939c1-bb9a-4e38-92ab-b1d523487fcc.xlsx
+wwwroot\uploads\894eb56e-ca80-401f-a3af-b42cdcb075ef.png
+wwwroot\uploads\a4759a3a-cff2-48bb-8425-5fa72d7c224c.pdf
+wwwroot\uploads\ab6a18ca-db80-43a7-bb0f-ea661055c3ef.xlsx
 wwwroot\uploads\ac31dd33-47d1-4f4e-a77c-a0b304115f16.png
+wwwroot\uploads\af7e7ce2-46a0-4b9b-89d5-3f8380373da9.pdf
+wwwroot\uploads\c452ccfb-0863-49d1-bbdd-cd2a412e4fab.pdf
+wwwroot\uploads\c8ea06d0-2f55-47a3-96cf-626836d71bc5.xlsx
+wwwroot\uploads\ccf1fd2e-989e-44e6-8cec-c0edfb6d68b4_Lelget PAG Receipt 25.09.2025.pdf
+wwwroot\uploads\d133fb7b-829c-486a-b18a-a626343f4f37_Voucher_2025_8_02_FullReport (6).pdf
+wwwroot\uploads\d467659a-32f5-4c80-bc88-5cb8b6c139f4.pdf
+wwwroot\uploads\ddb0694c-be4e-4efc-8d9e-d669b80c377b.pdf
+wwwroot\uploads\eb9fcf6b-601a-4d57-996b-8d2a608e2c47.pdf
+wwwroot\uploads\ebb311e9-502c-4f47-8161-3c5c7b8c14f9_24-09.xlsx
+wwwroot\uploads\ebb311e9-502c-4f47-8161-3c5c7b8c14f9_Mungelwo FGCK Receipt 24.09.2025.pdf
+wwwroot\uploads\ee6bad0f-1c00-47ff-890b-33b5039fdc03_22-08-25.xlsx
+wwwroot\uploads\ee6bad0f-1c00-47ff-890b-33b5039fdc03_Mogoiwo Catholic Church Receipt 22.09.2025.pdf
+wwwroot\uploads\f55ec01d-318c-4fea-a330-7f9a03e2e53a.pdf
 wwwroot\uploads\f8061b23-e8db-4ea4-b077-113138b6a7b5.png
+wwwroot\uploads\f9c4c1f8-404e-49c0-a91b-94fb3ee38d24.pdf
+wwwroot\uploads\fde0ebbe-8344-440e-b6d9-367156901e8f.pdf

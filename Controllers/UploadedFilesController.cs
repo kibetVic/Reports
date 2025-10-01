@@ -1,36 +1,14 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Drawing.Layout;
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
-using Reports.Data;
-using System.IO;
-using DocumentFormat.OpenXml.Packaging;
-using iText.IO.Font.Constants;
-using iText.IO.Image;
-using iText.Kernel.Colors;
-using iText.Kernel.Font;
-using iText.Kernel.Geom;
-using iText.Kernel.Pdf;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Drawing.Layout;
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Pdf.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Drawing.Layout;
+using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
 using Reports.Data;
 using Reports.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 using Path = System.IO.Path;
 
 public class UploadedFilesController : Controller
@@ -43,7 +21,13 @@ public class UploadedFilesController : Controller
     {
         _context = context;
         _env = env;
-        _uploadPath = Path.Combine(env.WebRootPath, "uploads");
+        //_uploadPath = Path.Combine(env.WebRootPath, "uploads");
+
+        _uploadPath = Path.Combine(env.WebRootPath, "uploads");  // physical path under wwwroot
+        if (!Directory.Exists(_uploadPath))
+        {
+            Directory.CreateDirectory(_uploadPath);
+        }
     }
 
     public async Task<IActionResult> Index()
@@ -164,10 +148,52 @@ public class UploadedFilesController : Controller
         }
     }
 
+
+    [HttpGet("UploadedFiles/ViewVoucher")]
+    public IActionResult ViewVoucher(int id)
+    {
+        if (id == 0)
+        {
+            TempData["ErrorMessage"] = "Invalid voucher ID.";
+            return RedirectToAction("Index", "PaymentVouchers");
+        }
+
+        var files = _context.UploadedFiles
+            .Where(f => f.PaymentVoucherId == id)
+            .Include(f => f.PaymentVoucher)
+            .ToList();
+
+        if (!files.Any())
+        {
+            TempData["ErrorMessage"] = "No files found for this voucher.";
+            return RedirectToAction("Index", "PaymentVouchers");
+        }
+
+        // ✅ Check if the file exists on disk
+        foreach (var f in files)
+        {
+            if (!string.IsNullOrEmpty(f.FilePath))
+            {
+                var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", f.FilePath.TrimStart('/'));
+                f.FileExists = System.IO.File.Exists(physicalPath);
+            }
+            else
+            {
+                f.FileExists = false;
+            }
+        }
+
+        return View(files);
+    }
+
+    [HttpGet("UploadedFiles/ViewBatch/{batchId}")]
     public IActionResult ViewBatch(string batchId)
     {
         if (string.IsNullOrEmpty(batchId))
-            return BadRequest();
+        {
+            TempData["ErrorMessage"] = "Invalid batch ID.";
+            return RedirectToAction("Index", "PaymentVouchers");
+        }
 
         var files = _context.UploadedFiles
             .Where(f => f.UploadBatchId == batchId)
@@ -175,11 +201,55 @@ public class UploadedFilesController : Controller
             .ToList();
 
         if (!files.Any())
-            return NotFound();
+        {
+            TempData["ErrorMessage"] = "No files found for this batch.";
+            return RedirectToAction("Index", "PaymentVouchers");
+        }
+
+        // ✅ Check if the file exists on disk
+        foreach (var f in files)
+        {
+            if (!string.IsNullOrEmpty(f.FilePath))
+            {
+                var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", f.FilePath.TrimStart('/'));
+                f.FileExists = System.IO.File.Exists(physicalPath);
+            }
+            else
+            {
+                f.FileExists = false;
+            }
+        }
 
         return View(files);
     }
-    
+
+
+
+
+
+
+    //public IActionResult ViewBatch(string batchId)
+    //{
+    //    if (string.IsNullOrEmpty(batchId))
+    //    {
+    //        TempData["ErrorMessage"] = "Invalid batch ID.";
+    //        return RedirectToAction("Index", "PaymentVouchers");
+    //    }
+
+    //    var files = _context.UploadedFiles
+    //        .Where(f => f.UploadBatchId == batchId)
+    //        .Include(f => f.PaymentVoucher)
+    //        .ToList();
+
+    //    if (!files.Any())
+    //    {
+    //        TempData["ErrorMessage"] = "No files found for this batch.";
+    //        return RedirectToAction("Index", "PaymentVouchers");
+    //    }
+
+    //    return View(files);
+    //}
+
 
 
     [HttpGet("UploadedFiles/Edit/{batchId}")]
@@ -212,9 +282,16 @@ public class UploadedFilesController : Controller
 
     [HttpPost("UploadedFiles/Edit/{batchId}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(string batchId, int[]? existingIds, string[]? existingNames,
-    IFormFile[]? replaceFiles, IFormFile[]? newFiles, string[]? newFileNames, int? paymentVoucherId
-    )
+    public async Task<IActionResult> Edit(
+    string batchId,
+    int[]? existingIds,
+    string[]? existingNames,
+    string[]? existingInfavourOf,
+    IFormFile[]? replaceFiles,
+    IFormFile[]? newFiles,
+    string[]? newFileNames,
+    string[]? newInfavourOf,
+    int? paymentVoucherId)
     {
         if (string.IsNullOrEmpty(batchId))
             return BadRequest();
@@ -226,39 +303,51 @@ public class UploadedFilesController : Controller
         if (!existingFiles.Any())
             return NotFound();
 
+        if (!paymentVoucherId.HasValue)
+        {
+            TempData["Error"] = "Please select a Payment Voucher.";
+            return RedirectToAction(nameof(Edit), new { batchId });
+        }
+
         try
         {
-            // ✅ Update file names
-            if (existingIds != null && existingNames != null)
+            // 1️⃣ Update existing file names & InFavourOf
+            if (existingIds != null && existingNames != null && existingInfavourOf != null)
             {
-                for (int i = 0; i < existingIds.Length && i < existingNames.Length; i++)
+                for (int i = 0; i < existingIds.Length; i++)
                 {
                     var file = existingFiles.FirstOrDefault(f => f.Id == existingIds[i]);
-                    if (file != null && !string.IsNullOrWhiteSpace(existingNames[i]))
+                    if (file != null)
                     {
-                        file.FileName = existingNames[i].Trim();
+                        file.FileName = !string.IsNullOrWhiteSpace(existingNames[i])
+                            ? existingNames[i].Trim()
+                            : file.FileName;
+
+                        file.InFavourOf = !string.IsNullOrWhiteSpace(existingInfavourOf[i])
+                            ? existingInfavourOf[i].Trim()
+                            : file.InFavourOf;
                     }
                 }
             }
 
-            // ✅ Replace existing files with uploaded ones
+            // 2️⃣ Replace existing files
             if (replaceFiles != null && existingIds != null)
             {
-                for (int i = 0; i < replaceFiles.Length && i < existingIds.Length; i++)
+                for (int i = 0; i < existingIds.Length; i++)
                 {
-                    var replacementFile = replaceFiles[i];
-                    if (replacementFile == null || replacementFile.Length == 0) continue;
+                    var replacementFile = replaceFiles.ElementAtOrDefault(i);
+                    if (replacementFile == null || replacementFile.Length == 0)
+                        continue;
 
                     var file = existingFiles.FirstOrDefault(f => f.Id == existingIds[i]);
                     if (file == null) continue;
 
-                    // Delete old file from disk
+                    // Delete old file
                     DeletePhysicalFile(file.FilePath!);
 
                     // Save new file
                     var newFileName = await SaveFileToDisk(replacementFile);
 
-                    // Update entity
                     file.FilePath = $"/uploads/{newFileName}";
                     file.FileType = replacementFile.ContentType?.StartsWith("image", StringComparison.OrdinalIgnoreCase) == true
                         ? "Image" : "Document";
@@ -266,26 +355,31 @@ public class UploadedFilesController : Controller
                 }
             }
 
-            // ✅ Add new files
+            // 3️⃣ Add new files
             if (newFiles != null)
             {
                 for (int i = 0; i < newFiles.Length; i++)
                 {
-                    var newFile = newFiles[i];
-                    if (newFile == null || newFile.Length == 0) continue;
+                    var file = newFiles[i];
+                    if (file == null || file.Length == 0) continue;
 
-                    var savedFileName = await SaveFileToDisk(newFile);
+                    var savedFileName = await SaveFileToDisk(file);
                     var customName = (newFileNames != null && i < newFileNames.Length)
                         ? newFileNames[i] : null;
+                    var favourOf = (newInfavourOf != null && i < newInfavourOf.Length)
+                        ? newInfavourOf[i] : null;
 
                     _context.UploadedFiles.Add(new UploadedFile
                     {
-                        PaymentVoucherId = paymentVoucherId ?? existingFiles.First().PaymentVoucherId,
+                        PaymentVoucherId = paymentVoucherId.Value,
                         FileName = !string.IsNullOrWhiteSpace(customName)
                             ? customName.Trim()
-                            : Path.GetFileNameWithoutExtension(newFile.FileName),
+                            : Path.GetFileNameWithoutExtension(file.FileName),
+                        InFavourOf = !string.IsNullOrWhiteSpace(favourOf)
+                            ? favourOf.Trim()
+                            : string.Empty,
                         FilePath = $"/uploads/{savedFileName}",
-                        FileType = newFile.ContentType?.StartsWith("image", StringComparison.OrdinalIgnoreCase) == true
+                        FileType = file.ContentType?.StartsWith("image", StringComparison.OrdinalIgnoreCase) == true
                             ? "Image" : "Document",
                         UploadBatchId = batchId,
                         UploadedOn = DateTime.UtcNow
@@ -293,18 +387,22 @@ public class UploadedFilesController : Controller
                 }
             }
 
-            // ✅ Update PaymentVoucherId for all files in this batch (if changed)
-            if (paymentVoucherId.HasValue)
+            // 4️⃣ Update PaymentVoucherId for all files
+            foreach (var file in existingFiles)
             {
-                foreach (var file in existingFiles)
-                {
-                    file.PaymentVoucherId = paymentVoucherId.Value;
-                }
+                file.PaymentVoucherId = paymentVoucherId.Value;
             }
 
             await _context.SaveChangesAsync();
+
             TempData["Message"] = "Changes saved successfully!";
             return RedirectToAction(nameof(Index));
+        }
+        catch (DbUpdateException dbEx)
+        {
+            var innerMsg = dbEx.InnerException?.Message ?? dbEx.Message;
+            TempData["Error"] = $"Error saving changes: {innerMsg}";
+            return RedirectToAction(nameof(Edit), new { batchId });
         }
         catch (Exception ex)
         {
@@ -312,7 +410,6 @@ public class UploadedFilesController : Controller
             return RedirectToAction(nameof(Edit), new { batchId });
         }
     }
-
 
 
     [HttpPost]
@@ -398,7 +495,8 @@ public class UploadedFilesController : Controller
         {
             foreach (var file in files)
             {
-                DeletePhysicalFile(file.FilePath!);
+                DeletePhysicalFile(file.FilePath ?? string.Empty);
+                //DeletePhysicalFile(file.FilePath!);
                 _context.UploadedFiles.Remove(file);
             }
 
@@ -412,6 +510,19 @@ public class UploadedFilesController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    private void DeletePhysicalFile(string filePath)
+    {
+        if (string.IsNullOrEmpty(filePath)) return;
+
+        var physicalPath = Path.Combine(_env.WebRootPath, filePath.TrimStart('/'));
+        if (System.IO.File.Exists(physicalPath))
+        {
+            System.IO.File.Delete(physicalPath);
+        }
+    }
+
+
 
     #region Private Helper Methods
 
@@ -536,26 +647,7 @@ public class UploadedFilesController : Controller
         }
     }
 
-    private void DeletePhysicalFile(string filePath)
-    {
-        if (string.IsNullOrEmpty(filePath)) return;
-
-        var physicalPath = Path.Combine(_env.WebRootPath, filePath.TrimStart('/'));
-        if (System.IO.File.Exists(physicalPath))
-        {
-            System.IO.File.Delete(physicalPath);
-        }
-    }
     #endregion
-
-
-
-
-
-
-
-
-
 
 
     [HttpGet]
@@ -574,8 +666,12 @@ public class UploadedFilesController : Controller
 
         using var outputDoc = new PdfSharpCore.Pdf.PdfDocument();
 
-        // -------- 1. Add all images first --------
-        var imageFiles = files.Where(f => f.FileType == "Image").ToList();
+        // -------- 1. Handle Images (.jpg/.png) --------
+        var imageFiles = files.Where(f =>
+            new[] { ".jpg", ".jpeg", ".png" }
+            .Contains(Path.GetExtension(f.FilePath).ToLowerInvariant()))
+            .ToList();
+
         foreach (var file in imageFiles)
         {
             var physicalPath = Path.Combine(_env.WebRootPath, file.FilePath.TrimStart('/'));
@@ -601,8 +697,12 @@ public class UploadedFilesController : Controller
             gfx.DrawImage(xImage, x, y, drawW, drawH);
         }
 
-        // -------- 2. Add documents (PDF, DOCX, TXT) --------
-        var docFiles = files.Where(f => f.FileType == "Document").ToList();
+        // -------- 2. Handle PDFs, DOCX, TXT (but NOT Excel) --------
+        var docFiles = files.Where(f =>
+            new[] { ".pdf", ".docx", ".txt" }
+            .Contains(Path.GetExtension(f.FilePath).ToLowerInvariant()))
+            .ToList();
+
         foreach (var file in docFiles)
         {
             var physicalPath = Path.Combine(_env.WebRootPath, file.FilePath.TrimStart('/'));
@@ -633,7 +733,27 @@ public class UploadedFilesController : Controller
             }
             catch
             {
-                continue; // skip unsupported or corrupted files
+                continue;
+            }
+        }
+
+        // -------- 3. Handle Excel (.xlsx) always at the end --------
+        var excelFiles = files.Where(f =>
+            Path.GetExtension(f.FilePath).ToLowerInvariant() == ".xlsx")
+            .ToList();
+
+        foreach (var file in excelFiles)
+        {
+            var physicalPath = Path.Combine(_env.WebRootPath, file.FilePath.TrimStart('/'));
+            if (!System.IO.File.Exists(physicalPath)) continue;
+
+            try
+            {
+                AddExcelAsPdfTable(physicalPath, outputDoc);
+            }
+            catch
+            {
+                continue;
             }
         }
 
@@ -664,7 +784,7 @@ public class UploadedFilesController : Controller
 
     private void AddTextAsPdfPages(string text, PdfSharpCore.Pdf.PdfDocument outputDoc)
     {
-        const int approxCharsPerPage = 3000; // split text into pages
+        const int approxCharsPerPage = 3000;
         var chunks = ChunkText(text, approxCharsPerPage);
         var font = new XFont("Arial", 12);
 
@@ -675,7 +795,7 @@ public class UploadedFilesController : Controller
             using var gfx = XGraphics.FromPdfPage(page);
             var tf = new XTextFormatter(gfx);
             var rect = new XRect(40, 40, page.Width - 80, page.Height - 80);
-            tf.DrawString(chunk, font, XBrushes.Black, rect/*, XStringFormats.Default*/); // ✔ corrected
+            tf.DrawString(chunk, font, XBrushes.Black, rect);
         }
     }
 
@@ -687,10 +807,176 @@ public class UploadedFilesController : Controller
         int index = 0;
         while (index < text.Length)
         {
-            int length = System.Math.Min(chunkSize, text.Length - index);
+            int length = Math.Min(chunkSize, text.Length - index);
             yield return text.Substring(index, length);
             index += length;
         }
     }
 
+    private void AddExcelAsPdfTable(string path, PdfSharpCore.Pdf.PdfDocument outputDoc)
+    {
+        using var stream = System.IO.File.Open(path, FileMode.Open, FileAccess.Read);
+        using var reader = ExcelDataReader.ExcelReaderFactory.CreateReader(stream);
+
+        var font = new XFont("Arial", 9);
+        double margin = 40;
+
+        do
+        {
+            // Read all rows into memory
+            var table = new List<List<string>>();
+            while (reader.Read())
+            {
+                var row = new List<string>();
+                bool hasData = false;
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    string cell = reader.GetValue(i)?.ToString()?.Trim() ?? "";
+
+                    // Skip Excel hidden headers/footers like "00:00 AM", names, phones
+                    if (!string.IsNullOrEmpty(cell))
+                        hasData = true;
+
+                    row.Add(cell);
+                }
+
+                // ✅ Only add rows that have real data and ignore junk
+                if (hasData && !IsHeaderOrFooterRow(row))
+                    table.Add(row);
+            }
+
+            if (table.Count == 0) continue;
+
+            int colCount = table.Max(r => r.Count);
+
+            // 1. Calculate column widths (auto-fit to content, then scale to fit page)
+            double[] colWidths = new double[colCount];
+            using (var measureGfx = XGraphics.CreateMeasureContext(
+                new XSize(2000, 2000), XGraphicsUnit.Point, XPageDirection.Downwards))
+            {
+                for (int c = 0; c < colCount; c++)
+                {
+                    double maxWidth = 40;
+                    foreach (var row in table)
+                    {
+                        if (c < row.Count)
+                        {
+                            string text = row[c];
+                            var size = measureGfx.MeasureString(text, font);
+                            if (size.Width + 10 > maxWidth)
+                                maxWidth = size.Width + 10;
+                        }
+                    }
+                    colWidths[c] = maxWidth;
+                }
+            }
+
+            // Fit to landscape width
+            var tempPage = outputDoc.AddPage();
+            tempPage.Size = PdfSharpCore.PageSize.A4;
+            tempPage.Orientation = PdfSharpCore.PageOrientation.Landscape;
+            double maxTableWidth = tempPage.Width - 2 * margin;
+            double totalWidth = colWidths.Sum();
+
+            if (totalWidth > maxTableWidth)
+            {
+                double scale = maxTableWidth / totalWidth;
+                for (int i = 0; i < colWidths.Length; i++)
+                    colWidths[i] *= scale;
+            }
+            outputDoc.Pages.Remove(tempPage);
+
+            // 2. Render into pages
+            var page = outputDoc.AddPage();
+            page.Size = PdfSharpCore.PageSize.A4;
+            page.Orientation = PdfSharpCore.PageOrientation.Landscape;
+            var gfx = XGraphics.FromPdfPage(page);
+            var tf = new XTextFormatter(gfx);
+
+            double startY = margin;
+
+            foreach (var row in table)
+            {
+                // --- calculate row height based on wrapped text ---
+                double rowHeight = 0;
+                for (int c = 0; c < colCount; c++)
+                {
+                    string text = c < row.Count ? row[c] : "";
+                    double cellWidth = colWidths[c];
+
+                    // Measure required height using text formatter
+                    var rect = new XRect(0, 0, cellWidth - 4, double.MaxValue);
+                    tf.Alignment = XParagraphAlignment.Left;
+                    tf.DrawString(text, font, XBrushes.Black, rect);
+
+                    // Estimate height from text length / font size
+                    var textHeight = font.GetHeight() *
+                                     Math.Ceiling((double)text.Length * font.Size / cellWidth);
+
+                    double neededHeight = Math.Max(20, textHeight + 6); // min row height = 20
+
+                    if (neededHeight > rowHeight) rowHeight = neededHeight;
+                }
+
+                // --- page break if needed ---
+                if (startY + rowHeight > page.Height - margin)
+                {
+                    page = outputDoc.AddPage();
+                    page.Size = PdfSharpCore.PageSize.A4;
+                    page.Orientation = PdfSharpCore.PageOrientation.Landscape;
+                    gfx = XGraphics.FromPdfPage(page);
+                    tf = new XTextFormatter(gfx);
+                    startY = margin;
+                }
+
+                // --- draw row ---
+                double startX = margin;
+                for (int c = 0; c < colCount; c++)
+                {
+                    string text = c < row.Count ? row[c] : "";
+                    double cellWidth = colWidths[c];
+
+                    var cellRect = new XRect(startX, startY, cellWidth, rowHeight);
+
+                    // Draw border
+                    gfx.DrawRectangle(XPens.Black, cellRect);
+
+                    // Draw wrapped text inside (no XStringFormats)
+                    tf.Alignment = XParagraphAlignment.Left;
+                    tf.DrawString(text, font, XBrushes.Black,
+                        new XRect(cellRect.X + 2, cellRect.Y + 2, cellRect.Width - 4, cellRect.Height - 4));
+
+                    startX += cellWidth;
+                }
+
+                startY += rowHeight;
+            }
+
+
+        } while (reader.NextResult());
+    }
+
+    private bool IsHeaderOrFooterRow(List<string> row)
+    {
+        string line = string.Join(" ", row).ToUpper().Trim();
+
+        // ✅ Skip completely empty rows
+        if (string.IsNullOrWhiteSpace(line)) return true;
+
+        // ✅ Skip Excel export timestamps like "00:00 AM" / "12:45 PM"
+        if (line.Contains("AM") || line.Contains("PM")) return true;
+
+        // ✅ Skip footer rows with church info
+        if (line.Contains("CHURCH") || line.Contains("CATHOLIC")) return true;
+
+        // ✅ Keep table headers like "DATE FARMER'S NAME FARMER'S PHONE NO"
+        if (line.Contains("DATE") && line.Contains("FARMER")) return false;
+
+        // ✅ Keep rows that look like data (numbers/phones/amounts)
+        if (row.Any(c => c.Any(char.IsDigit))) return false;
+
+        // Default: treat as junk
+        return true;
+    }
 }

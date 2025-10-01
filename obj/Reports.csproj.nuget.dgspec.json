@@ -55,6 +55,14 @@
               "target": "Package",
               "version": "[3.3.0, )"
             },
+            "ExcelDataReader": {
+              "target": "Package",
+              "version": "[3.8.0, )"
+            },
+            "ExcelDataReader.DataSet": {
+              "target": "Package",
+              "version": "[3.8.0, )"
+            },
             "Microsoft.Azure.Management.BatchAI.Fluent": {
               "target": "Package",
               "version": "[1.38.1, )"

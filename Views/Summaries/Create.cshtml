@@ -24,72 +24,81 @@
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label asp-for="PaymentVoucherId" class="form-label fw-semibold">Voucher Name</label>
+                            <div class="col-md-3">
+                                <label asp-for="PaymentVoucherId" class="form-label fw-semibold">Voucher Number</label>
                                 <select asp-for="PaymentVoucherId" class="form-select" asp-items="ViewBag.PaymentVoucherId"></select>
                             </div>
-                            <div class="col-md-4">
-                                <label asp-for="VenueId" class="form-label fw-semibold">Venue</label>
-                                <select asp-for="VenueId" class="form-select" asp-items="ViewBag.VenueId"></select>
+                            <div class="col-md-3">
+                                <label asp-for="Venue" class="form-label fw-semibold">Venue</label>
+                                <input asp-for="Venue" class="form-control" placeholder="Venue eg Chemitan" />
+                                <span asp-validation-for="Venue" class="text-danger small"></span>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label asp-for="CountyId" class="form-label fw-semibold">County</label>
                                 <select asp-for="CountyId" class="form-select" asp-items="ViewBag.CountyId"></select>
                             </div>
+
+                            <div class="col-md-3 d-flex align-items-center">
+                                <div class="form-check mt-4">
+                                    <input asp-for="IsPaid" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsPaid" class="form-check-label">Paid?</label>
+                                </div>
+                            </div>
+
                             <div class="col-md-4">
                                 <label asp-for="HallHireNo" class="form-label fw-semibold">NO of Hall's</label>
-                                <input asp-for="HallHireNo" class="form-control" />
+                                <input asp-for="HallHireNo" class="form-control" placeholder="Number of halls/chairs hired"/>
                                 <span asp-validation-for="HallHireNo" class="text-danger small"></span>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="EachHallAmount" class="form-label fw-semibold">Amount per Hall</label>
-                                <input asp-for="EachHallAmount" class="form-control" />
+                                <input asp-for="EachHallAmount" class="form-control" placeholder="Amount per hall or chair hired"/>
                                 <span asp-validation-for="EachHallAmount" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="MpesaChargesPerHall" class="form-label fw-semibold">Mpesa Charges Per Hall</label>
-                                <input asp-for="MpesaChargesPerHall" class="form-control" />
+                                <input asp-for="MpesaChargesPerHall" class="form-control" placeholder="Mpesa Charges Per Hall or chair" />
                                 <span asp-validation-for="MpesaChargesPerHall" class="text-danger small"></span>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="LeadFarmersNo" class="form-label fw-semibold">No. of Lead Farmers</label>
-                                <input asp-for="LeadFarmersNo" class="form-control" />
+                                <input asp-for="LeadFarmersNo" class="form-control" placeholder="Number of Lead Farmers per venue" />
                                 <span asp-validation-for="LeadFarmersNo" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="EachLeadFarmersAmount" class="form-label fw-semibold">Amount per Farmer</label>
-                                <input asp-for="EachLeadFarmersAmount" class="form-control" />
+                                <input asp-for="EachLeadFarmersAmount" class="form-control" placeholder="Amount per Farmer in a venue" />
                                 <span asp-validation-for="EachLeadFarmersAmount" class="text-danger small"></span>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="MpesaChargesPerLeadFarmers" class="form-label fw-semibold">Mpesa Charges PerLead Farmers</label>
-                                <input asp-for="MpesaChargesPerLeadFarmers" class="form-control" />
+                                <input asp-for="MpesaChargesPerLeadFarmers" class="form-control" placeholder="Mpesa Charges PerLead Farmers" />
                                 <span asp-validation-for="MpesaChargesPerLeadFarmers" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label asp-for="EANo" class="form-label fw-semibold">Number of E.A</label>
-                                <input asp-for="EANo" class="form-control" />
+                                <input asp-for="EANo" class="form-control" placeholder="Number of EA's'" />
                                 <span asp-validation-for="EANo" class="text-danger small"></span>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="EachEAAmount" class="form-label fw-semibold">Amount per E.A</label>
-                                <input asp-for="EachEAAmount" class="form-control" />
+                                <input asp-for="EachEAAmount" class="form-control" placeholder="Amount paid each EA"/>
                                 <span asp-validation-for="EachEAAmount" class="text-danger small"></span>
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="MpesaChargesPerEA" class="form-label fw-semibold">Mpesa Charges Per EA</label>
-                                <input asp-for="MpesaChargesPerEA" class="form-control" />
+                                <input asp-for="MpesaChargesPerEA" class="form-control" placeholder="Mpesa Charges Per EA" />
                                 <span asp-validation-for="MpesaChargesPerEA" class="text-danger small"></span>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-primary px-5">Save Summary</button>
                             <a asp-action="Index" class="btn btn-outline-secondary px-4">← Back</a>
-                            <button type="submit" class="btn btn-primary px-5">Create</button>
                         </div>
                     </form>
                 </div>

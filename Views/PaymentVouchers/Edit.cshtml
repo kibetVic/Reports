@@ -6,32 +6,19 @@
 
 <div class="container mt-4">
     <div class="card shadow-lg rounded-3">
-        <div class="card-header bg-warning text-dark text-center">
-            <h3 class="mb-0">Edit Payment Voucher</h3>
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">Payment Voucher</h3>
         </div>
         <div class="card-body">
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div class="alert alert-danger">
-                    <strong>Model validation failed!</strong>
-                    <ul>
-                        @foreach (var state in ViewData.ModelState)
-                        {
-                            foreach (var error in state.Value.Errors)
-                            {
-                                <li><b>@state.Key</b>: @error.ErrorMessage</li>
-                            }
-                        }
-                    </ul>
-                </div>
-            }
             <form asp-action="Edit" method="post">
                 <input type="hidden" asp-for="PaymentVoucherId" />
 
+                <!-- Voucher Info -->
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label asp-for="VoucheName" class="form-label fw-bold">Voucher Name</label>
-                        <input asp-for="VoucheName" class="form-control" />
+                        <input asp-for="VoucheName" class="form-control" placeholder="Voucher Name as: 2025/9/25" />
+                        <span asp-validation-for="VoucheName" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
                         <label asp-for="PaymentMode" class="form-label fw-bold">Payment Mode</label>
@@ -39,20 +26,61 @@
                             <option value="M-pesa" selected="@(Model.PaymentMode == "M-pesa")">M-pesa</option>
                             <option value="Cash" selected="@(Model.PaymentMode == "Cash")">Cash</option>
                         </select>
+                        <span asp-validation-for="PaymentMode" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
                         <label asp-for="PaymentInFavourOf" class="form-label fw-bold">Payment In Favour Of</label>
-                        <input asp-for="PaymentInFavourOf" class="form-control" />
+                        <input asp-for="PaymentInFavourOf" class="form-control" placeholder="Farmerchat activities in Nandi ..." />
+                        <span asp-validation-for="PaymentInFavourOf" class="text-danger"></span>
                     </div>
                 </div>
 
+                <!-- Voucher Items -->
                 <h4 class="mt-4">Voucher Items</h4>
-                <table class="table table-bordered table-striped align-middle mt-2" id="itemsTable">
+
+                <!-- Input row for new item -->
+                <div class="row mb-3 border p-3 rounded bg-light">
+                    <div class="col-md-2">
+                        <label class="form-label">Item Number</label>
+                        <input id="newItemNo" class="form-control" type="number" placeholder="1, 2, 3,..." />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Each Amount</label>
+                        <input id="newEachAmount" class="form-control" type="number" step="0.01" placeholder="500, 3000,..." />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">M-Pesa Charges</label>
+                        <input id="newMpesaCharges" class="form-control" type="number" step="0.01" placeholder="5, 9, 13,..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Description</label>
+                        <select id="newDescriptionSelect" class="form-select" onchange="toggleCustomDescription()">
+                            <option value="">-- Select Description --</option>
+                            @foreach (var desc in ViewBag.VoucherDescriptions as List<string>)
+                            {
+                                <option value="@desc">@desc</option>
+                            }
+                            <option value="__custom__" class="custom-option">➕ Others (Add New Description)</option>
+                        </select>
+                        <input id="newDescription" class="form-control mt-2 d-none" placeholder="Enter custom description..." />
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Cts</label>
+                        <input id="newCts" class="form-control" type="number" step="1" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-success w-100" onclick="addItem()">+ Add Item</button>
+                    </div>
+                </div>
+
+                <!-- Table for displaying existing + new items -->
+                <table class="table table-bordered table-striped align-middle mt-3" id="itemsTable">
                     <thead class="table-light">
                         <tr>
-                            <th>No</th>
+                            <th>Item Number</th>
+                            <th>Each Amount</th>
+                            <th>M-Pesa Charges</th>
                             <th>Description</th>
-                            <th>Amount</th>
                             <th>Cts</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -66,12 +94,21 @@
                                 <tr>
                                     <td>
                                         <input type="hidden" name="Items[@index].Id" value="@item.Id" />
-                                        <input type="hidden" name="Items[@index].VoucherId" value="@Model.PaymentVoucherId" />
-                                        <input name="Items[@index].ItemNo" value="@item.ItemNo" class="form-control" type="number" />
+                                        <input type="hidden" name="Items[@index].PaymentVoucherId" value="@Model.PaymentVoucherId" />
+                                        <input name="Items[@index].ItemNo" class="form-control" type="number" value="@item.ItemNo" readonly />
                                     </td>
-                                    <td><input name="Items[@index].Description" value="@item.Description" class="form-control" /></td>
-                                    <td><input name="Items[@index].Amount" value="@item.Amount" class="form-control" type="number" step="0.01" /></td>
-                                    <td><input name="Items[@index].Cts" value="@item.Cts" class="form-control" type="number" step="1" /></td>
+                                    <td>
+                                        <input name="Items[@index].EachAmount" class="form-control" type="number" step="0.01" value="@item.EachAmount" readonly />
+                                    </td>
+                                    <td>
+                                        <input name="Items[@index].MpesaCharges" class="form-control" type="number" step="0.01" value="@item.MpesaCharges" readonly />
+                                    </td>
+                                    <td>
+                                        <textarea name="Items[@index].Description" class="form-control" rows="1" readonly>@item.Description</textarea>
+                                    </td>
+                                    <td>
+                                        <input name="Items[@index].Cts" class="form-control" type="number" step="1" value="@item.Cts" readonly />
+                                    </td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Remove</button>
                                     </td>
@@ -81,30 +118,27 @@
                         }
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-success mb-3" onclick="addItem()">+ Add Item</button>
 
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label asp-for="AmountInWords" class="form-label fw-bold">Amount In Words</label>
-                        <input asp-for="AmountInWords" class="form-control" readonly />
-                    </div>
-                </div>
-
-                <div class="row mb-3">
+                <!-- Prepared By / Checked By / Approved By -->
+                <div class="row mb-3 mt-4">
                     <div class="col-md-4">
                         <label asp-for="PreparedBy" class="form-label fw-bold">Prepared By</label>
-                        <input asp-for="PreparedBy" class="form-control" />
+                        <input asp-for="PreparedBy" class="form-control" placeholder="Victor Kibet" />
+                        <span asp-validation-for="PreparedBy" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
                         <label asp-for="CheckedBy" class="form-label fw-bold">Checked By</label>
-                        <input asp-for="CheckedBy" class="form-control" />
+                        <input asp-for="CheckedBy" class="form-control" placeholder="John Emali" />
+                        <span asp-validation-for="CheckedBy" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
                         <label asp-for="ApprovedBy" class="form-label fw-bold">Approved By</label>
-                        <input asp-for="ApprovedBy" class="form-control" />
+                        <input asp-for="ApprovedBy" class="form-control" placeholder="Pius Sigei" />
+                        <span asp-validation-for="ApprovedBy" class="text-danger"></span>
                     </div>
                 </div>
 
+                <!-- Buttons -->
                 <div class="text-end">
                     <button type="submit" class="btn btn-warning px-4">Update Voucher</button>
                     <a asp-action="Index" class="btn btn-secondary px-4">⬅ Back</a>
@@ -115,27 +149,74 @@
 </div>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
         let itemIndex = @Model.Items?.Count() ?? 0;
 
+        function toggleCustomDescription() {
+            const select = document.getElementById("newDescriptionSelect");
+            const input = document.getElementById("newDescription");
+
+            if (select.value === "__custom__") {
+                input.classList.remove("d-none");
+                input.value = "";
+                input.focus();
+            } else {
+                input.classList.add("d-none");
+                input.value = select.value; // mirror selected value
+            }
+        }
+
         function addItem() {
+            const itemNo = document.getElementById("newItemNo").value;
+            const eachAmount = document.getElementById("newEachAmount").value;
+            const mpesaCharges = document.getElementById("newMpesaCharges").value;
+            const descriptionSelect = document.getElementById("newDescriptionSelect");
+            const descriptionInput = document.getElementById("newDescription");
+            const description = descriptionSelect.value === "__custom__" ? descriptionInput.value : descriptionInput.value;
+            const cts = document.getElementById("newCts").value;
+
+            if (!itemNo || !eachAmount || !description) {
+                alert("Please fill Item Number, Amount and Description.");
+                return;
+            }
+
             const tbody = document.querySelector("#itemsTable tbody");
             const row = document.createElement("tr");
 
             row.innerHTML = `
                 <td>
-                    <input type="hidden" name="Items[${itemIndex}].Id" value="0" />
-                    <input type="hidden" name="Items[${itemIndex}].VoucherId" value="@Model.PaymentVoucherId" />
-                    <input name="Items[${itemIndex}].ItemNo" class="form-control" type="number" />
+                    <input name="Items[${itemIndex}].ItemNo" class="form-control" type="number" value="${itemNo}" readonly />
                 </td>
-                <td><input name="Items[${itemIndex}].Description" class="form-control" /></td>
-                <td><input name="Items[${itemIndex}].Amount" class="form-control" type="number" step="0.01" /></td>
-                <td><input name="Items[${itemIndex}].Cts" class="form-control" type="number" step="1" /></td>
-                <td class="text-center"><button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Remove</button></td>
+                <td>
+                    <input name="Items[${itemIndex}].EachAmount" class="form-control" type="number" step="0.01" value="${eachAmount}" readonly />
+                </td>
+                <td>
+                    <input name="Items[${itemIndex}].MpesaCharges" class="form-control" type="number" step="0.01" value="${mpesaCharges}" readonly />
+                </td>
+                <td>
+                    <textarea name="Items[${itemIndex}].Description" class="form-control" rows="1" readonly>${description}</textarea>
+                </td>
+                <td>
+                    <input name="Items[${itemIndex}].Cts" class="form-control" type="number" step="1" value="${cts}" readonly />
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Remove</button>
+                </td>
             `;
 
             tbody.appendChild(row);
             itemIndex++;
+
+            // clear inputs
+            document.getElementById("newItemNo").value = "";
+            document.getElementById("newEachAmount").value = "";
+            document.getElementById("newMpesaCharges").value = "";
+            document.getElementById("newDescriptionSelect").value = "";
+            document.getElementById("newDescription").value = "";
+            document.getElementById("newDescription").classList.add("d-none");
+            document.getElementById("newCts").value = "";
         }
 
         function removeItem(button) {
@@ -146,7 +227,7 @@
         function reindexItems() {
             const rows = document.querySelectorAll("#itemsTable tbody tr");
             rows.forEach((row, index) => {
-                row.querySelectorAll("input").forEach(input => {
+                row.querySelectorAll("input, textarea").forEach(input => {
                     input.name = input.name.replace(/\[\d+\]/, `[${index}]`);
                 });
             });

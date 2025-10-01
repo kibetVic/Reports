@@ -2,118 +2,134 @@
 
 @{
     ViewData["Title"] = "Payment Vouchers";
-    var counter = 1;
-    // Order by Date (or Id) descending so latest is at the top
     var vouchers = Model.OrderByDescending(v => v.Date).ToList();
 }
 
 <style>
-    .table td tr{
-        font-size:12px;
+    /* Optimize table readability */
+    .table td,
+    .table th {
+        padding: 6px 10px !important;
+        font-size: 13px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    /* Wrap action buttons nicely */
+    .btn-group-sm .btn {
+        margin-bottom: 4px;
     }
 </style>
 
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <div>
-                <h4 class="mb-0">Payment Vouchers</h4>
-                <small class="text-muted">List of generated payment vouchers</small>
-            </div>
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-light border-bottom">
+            <div class="card-header bg-light border-bottom mb-3">
 
-            <div class="ms-auto d-flex gap-2 align-items-center">
-                <a asp-action="Create"
-                   class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
-                   style="width:150px;">
-                    <i class="bi bi-plus-lg"></i>
-                    <span>Create New</span>
-                </a>
-
-                <div class="input-group input-group-sm" style="min-width:260px;">
-                    <input id="searchBox" type="search" class="form-control" placeholder="Search (voucher, payee, mode...)" />
-                    <button id="clearSearch" type="button" class="btn btn-outline-secondary">Clear</button>
+                <!-- 🔝 Header Title -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold text-primary mb-0">💼 Payment Vouchers</h4>
                 </div>
 
-                <select id="modeFilter" class="form-select form-select-sm" style="width:auto;">
-                    <option value="">All Modes</option>
-                    <option value="M-pesa">M-pesa</option>
-                    <option value="Cash">Cash</option>
-                </select>
+                <!-- 🔎 Search + Actions (Responsive) -->
+                <div class="d-flex gap-2 flex-wrap align-items-center">
+                    <!-- Search bar -->
+                    <div class="d-flex gap-2 flex-grow-1">
+                        <input type="search" id="searchBox" class="form-control" placeholder="🔎 Search by voucher, payee, mode, etc..." />
+                        <button type="button" id="clearSearch" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Reset
+                        </button>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 ms-3">
+                        <a asp-action="CreateWithFiles" class="btn btn-primary d-flex align-items-center">
+                            <i class="bi bi-plus-circle me-1"></i> Create New
+                        </a>
+                        @* <a asp-action="Index" class="btn btn-outline-primary d-flex align-items-center">
+                            <i class="bi bi-list-ul me-1"></i> All Vouchers
+                        </a> *@
+                    </div>
+                </div>
             </div>
+
         </div>
 
-        <div class="card shadow-lg border-0 rounded-3">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle mb-0">
-                        <thead class="table-primary">
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger text-center m-3" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-primary text-center">
                         <tr>
-                            <th style="width:50px;">No.</th>
-                            <th>Name</th>
-                            <th>Cheque</th>
+                            <th></th>
+                            <th>Voucher No.</th>
+                            <th>Total (Ksh)</th>
                             <th>Mode</th>
-                            <th>Payee</th>
-                            <th class="text-end">Total(Ksh)</th>
+                            <th>Summaries</th>
+                            <th>Files</th>
                             <th>Prepared</th>
                             <th>Checked</th>
                             <th>Approved</th>
-                            <th class="text-center" style="width:150px">Actions</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="vouchersTableBody">
                         @foreach (var item in vouchers)
                         {
                             <tr>
-                                <td>@counter</td>
                                 <td>
-                                    <strong>@Html.DisplayFor(m => item.VoucheName)</strong>
+                                    <a asp-action="EditWithFiles" asp-route-id="@item.PaymentVoucherId" class="text-decoration-underline text-primary">Select</a>
                                 </td>
-                                <td>@Html.DisplayFor(m => item.ChequeNo)</td>
+                                <td><strong>@Html.DisplayFor(m => item.VoucheName)</strong></td>
+                                <td>@String.Format("{0:N2}", item.TotalAmount ?? 0)</td>
                                 <td>
                                     <span class="badge @(item.PaymentMode == "M-pesa" ? "bg-success" : item.PaymentMode == "Cash" ? "bg-info" : "bg-secondary")">
                                         @item.PaymentMode
                                     </span>
                                 </td>
-                                <td>@Html.DisplayFor(m => item.PaymentInFavourOf)</td>
-                                <td class="text-end">@String.Format("{0:N2}", item.TotalAmount ?? 0)</td>
+                                <td>@(item.Summaries?.Count ?? 0)</td>
+                                <td>@(item.UploadedFile?.Count ?? 0)</td>
                                 <td>@Html.DisplayFor(m => item.PreparedBy)</td>
                                 <td>@Html.DisplayFor(m => item.CheckedBy)</td>
                                 <td>@Html.DisplayFor(m => item.ApprovedBy)</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                            <a asp-action="Edit" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-primary">Edit</a>
-                                            <a asp-action="GeneratePdf" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-success">PDF</a>
-                                            <a asp-action="Delete" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-danger"
-                                           onclick="return confirm('Are you sure you want to delete this voucher?');">
-                                            Delete
+                                <td>
+                                    <div class="text-center">
+                                        <a asp-action="GeneratePdf" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-success btn-sm">PDF</a>
+                                        <a asp-action="Delete" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-danger btn-sm"
+                                           onclick="return confirm('Are you sure you want to delete this voucher?');">Delete</a>
+                                        <a asp-controller="UploadedFiles" asp-action="ViewVoucher" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-primary btn-sm">Files</a>
+                                        <a asp-action="Details" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-info btn-sm">
+                                            <i class="bi bi-eye"></i> View
                                         </a>
-                                            <a asp-action="Details" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-info btn-sm me-1">
-                                            <i class="bi bi-eye"></i> Details
+                                        <a asp-action="GenerateFullReport" asp-route-id="@item.PaymentVoucherId" class="btn btn-outline-success btn-sm">
+                                            <i class="bi bi-file-earmark-text"></i> Full PDF
                                         </a>
                                     </div>
                                 </td>
                             </tr>
-                            counter++;
                         }
                     </tbody>
                 </table>
             </div>
-            </div>
         </div>
 
-        <div class="card-footer text-muted small">
+        <div class="card-footer text-muted small text-center text-md-start">
             Showing <span id="visibleCount">@vouchers.Count</span> vouchers
         </div>
     </div>
 </div>
-
 
 @section Scripts {
     <script>
         (function () {
             const searchBox = document.getElementById('searchBox');
             const clearBtn = document.getElementById('clearSearch');
-            const modeFilter = document.getElementById('modeFilter');
             const tbody = document.getElementById('vouchersTableBody');
             const visibleCount = document.getElementById('visibleCount');
 
@@ -125,31 +141,29 @@
 
             function filterRows() {
                 const q = normalize(searchBox.value);
-                const mode = modeFilter.value;
 
                 Array.from(tbody.rows).forEach(row => {
                     const text = normalize(row.innerText);
-                    const rowMode = normalize(row.cells[3].innerText);
-
-                    const matchesQuery = q === '' || text.indexOf(q) !== -1;
-                    const matchesMode = mode === '' || rowMode === mode.toLowerCase();
-
-                    row.hidden = !(matchesQuery && matchesMode);
+                    row.hidden = !(q === '' || text.includes(q));
                 });
 
                 refreshCount();
             }
 
             searchBox.addEventListener('input', filterRows);
-            modeFilter.addEventListener('change', filterRows);
             clearBtn.addEventListener('click', function () {
                 searchBox.value = '';
-                modeFilter.value = '';
                 filterRows();
             });
 
-            // initialize
             filterRows();
+
+            // Auto close alerts
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    new bootstrap.Alert(alert).close();
+                });
+            }, 4000);
         })();
     </script>
 }
