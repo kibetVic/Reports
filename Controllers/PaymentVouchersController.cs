@@ -220,7 +220,7 @@ namespace Reports.Controllers
 
             // Set totals
             voucher.Items = model.Items;
-            voucher.TotalAmount = voucher.Items.Sum(i => i.Amount);
+            voucher.TotalAmount = voucher.Items.Sum(i => i.Amount) - voucher.VAT;
             voucher.AmountInWords = NumberToWordsConverter.ConvertAmountToWords(voucher.TotalAmount ?? 0);
 
             //voucher.PreparedBy = User.Identity?.Name;
@@ -372,8 +372,14 @@ namespace Reports.Controllers
                     }
                 }
 
-                // Totals
-                voucher.TotalAmount = model.Items?.Sum(i => i.Amount) ?? 0;
+                voucher.Items = model.Items;
+
+                // ✅ Calculate total minus VAT only once
+                var totalBeforeVAT = model.Items?.Sum(i => i.Amount) ?? 0;
+                var vatAmount = voucher.VAT ?? 0;
+                voucher.TotalAmount = totalBeforeVAT - vatAmount;
+
+                // Amount in Words
                 voucher.AmountInWords = NumberToWordsConverter.ConvertAmountToWords(voucher.TotalAmount ?? 0);
 
                 _context.Update(voucher);

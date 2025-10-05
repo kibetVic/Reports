@@ -20,7 +20,6 @@ namespace Reports.Models
         [Required]
         [StringLength(500)]
         public string Description { get; set; }
-
         [Required]
         [DataType(DataType.Currency)]
         public decimal Amount { get; set; }

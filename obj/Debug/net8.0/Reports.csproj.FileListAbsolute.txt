@@ -326,3 +326,4 @@ D:\Amtech 2025.8\Projects\Reports\Reports\obj\Debug\net8.0\ref\Reports.dll
 D:\Amtech 2025.8\Projects\Reports\Reports\bin\Debug\net8.0\BouncyCastle.Crypto.dll
 D:\Amtech 2025.8\Projects\Reports\Reports\bin\Debug\net8.0\ExcelDataReader.dll
 D:\Amtech 2025.8\Projects\Reports\Reports\bin\Debug\net8.0\ExcelDataReader.DataSet.dll
+D:\Amtech 2025.8\Projects\Reports\Reports\obj\Debug\net8.0\Reports.sourcelink.json

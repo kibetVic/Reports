@@ -90,6 +90,9 @@ namespace Reports.Migrations
                     b.Property<int?>("UserAccountId")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("VAT")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int?>("VenueId")
                         .HasColumnType("int");
 
