@@ -792,16 +792,34 @@ namespace Reports.Controllers
         {
             var voucher = await _context.PaymentVouchers
                 .Include(v => v.Items)
+                .Include(v => v.Summaries) // ✅ include summaries to check dependency
                 .FirstOrDefaultAsync(v => v.PaymentVoucherId == id);
 
-            if (voucher != null)
+            if (voucher == null)
+            {
+                return NotFound();
+            }
+
+            // ✅ Check if this voucher has summaries linked
+            if (voucher.Summaries != null && voucher.Summaries.Any())
+            {
+                TempData["ErrorMessage"] = "❌ You cannot delete this voucher because it has linked summaries.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // ✅ Safe to delete
+            if (voucher.Items != null && voucher.Items.Any())
             {
                 _context.PaymentVoucherItems.RemoveRange(voucher.Items);
-                _context.PaymentVouchers.Remove(voucher);
-                await _context.SaveChangesAsync();
             }
+
+            _context.PaymentVouchers.Remove(voucher);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "✅ Voucher deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: PaymentVouchers/Details/5
         [Authorize]
@@ -879,8 +897,8 @@ namespace Reports.Controllers
                         .SetFontSize(8).SetBold().SetFontColor(new DeviceRgb(173, 216, 230)))
                     .Add(new Text("P.O. BOX 79701-00200, NAIROBI\n")
                         .SetFontSize(8).SetBold().SetFontColor(new DeviceRgb(173, 216, 230)))
-                    .Add(new Text("DATE: ").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)))
-                    .Add(new Text($"{voucher.Date:dd/MM/yyyy}\n").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)).SetUnderline())
+                    //.Add(new Text("DATE: ").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)))
+                    //.Add(new Text($"{voucher.Date:dd/MM/yyyy}\n").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)).SetUnderline())
                     .Add(new Text("PAID")
                         .SetFontSize(20).SetBold().SetFontColor(new DeviceRgb(173, 216, 230)));
 
@@ -905,7 +923,7 @@ namespace Reports.Controllers
                 }
 
                 // --- Title ---
-                var title = new Paragraph("Cheque/Cash Payment Voucher")
+                var title = new Paragraph("Cheque/M-pesa/Cash Payment Voucher")
                     .SetTextAlignment(TextAlignment.CENTER)
                     .SetFontSize(18)
                     .SetBold()
@@ -956,10 +974,26 @@ namespace Reports.Controllers
                 )));
                 document.Add(table);
 
+                // --- Add Failed Section only if data exists ---
+                if (!string.IsNullOrWhiteSpace(voucher.FailedDesc) || (voucher.VAT.HasValue && voucher.VAT.Value > 0))
+                {
+                    Paragraph failedLine = new Paragraph()
+                        .SetFontSize(11)
+                        .Add(new Text(" "))
+                        .Add(new Text(voucher.FailedDesc ?? "N/A")/*.SetUnderline(0.5f, -1)*/)
+                        .Add(new Text("  ")) // small space
+                        .Add(new Text(" and Total failed Amount: "))
+                        .Add(new Text((voucher.VAT ?? 0).ToString("N2"))/*.SetUnderline(0.5f, -1)*/);
+
+                    document.Add(failedLine);
+                }
+
                 // --- Amount in words ---
-                document.Add(new Paragraph("\nAmount in words: ")
+                Paragraph wordsLine = new Paragraph()
                     .SetFontSize(11)
-                    .Add(new Text(voucher.AmountInWords ?? "").SetUnderline(0.5f, -1)));
+                    .Add(new Text("Amount in words: "))
+                    .Add(new Text(voucher.AmountInWords ?? "").SetUnderline(0.5f, -1));
+                document.Add(wordsLine);
 
                 // --- Payment Made in ---
                 string paymentText = (!string.IsNullOrEmpty(voucher.PaymentMode) &&
@@ -967,9 +1001,12 @@ namespace Reports.Controllers
                     ? "Ksh B2C"
                     : "Ksh (Cash)";
 
-                document.Add(new Paragraph("\nPayment Made in: ")
+                Paragraph paymentLine = new Paragraph()
                     .SetFontSize(11)
-                    .Add(new Text(paymentText).SetUnderline(0.5f, -1)));
+                    .Add(new Text("Payment Made in: "))
+                    .Add(new Text(paymentText).SetUnderline(0.5f, -1));
+                document.Add(paymentLine);
+
 
 
                 // signatures with images
@@ -1087,14 +1124,14 @@ namespace Reports.Controllers
                     .SetFontSize(8).SetBold().SetFontColor(new DeviceRgb(173, 216, 230)))
                 .Add(new Text("P.O. BOX 79701-00200, NAIROBI\n")
                     .SetFontSize(8).SetBold().SetFontColor(new DeviceRgb(173, 216, 230)))
-                .Add(new Text("DATE: ").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)))
-                .Add(new Text($"{voucher.Date:dd/MM/yyyy}\n").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)).SetUnderline())
+                //.Add(new Text("DATE: ").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)))
+                //.Add(new Text($"{voucher.Date:dd/MM/yyyy}\n").SetFontSize(10).SetFontColor(new DeviceRgb(173, 216, 230)).SetUnderline())
                 .Add(new Text("PAID")
                     .SetFontSize(20).SetBold().SetFontColor(new DeviceRgb(173, 216, 230)));
 
             doc.ShowTextAligned(
                 stampText,
-                400, 400, // position center
+                450, 400, // position center
                 pdf.GetNumberOfPages(),
                 TextAlignment.CENTER,
                 VerticalAlignment.MIDDLE,
@@ -1114,7 +1151,7 @@ namespace Reports.Controllers
             }
 
             // --- Voucher Header ---
-            var title = new Paragraph("Cheque/Cash Payment Voucher")
+            var title = new Paragraph("Cheque/M-pesa/Cash Payment Voucher")
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetFontSize(18)
                 .SetBold()
@@ -1166,10 +1203,26 @@ namespace Reports.Controllers
             table.SetMarginBottom(15);
             doc.Add(table);
 
-            doc.Add(new Paragraph("\nAmount in words: ")
+            // --- Add Failed Section only if data exists ---
+            if (!string.IsNullOrWhiteSpace(voucher.FailedDesc) || (voucher.VAT.HasValue && voucher.VAT.Value > 0))
+            {
+                Paragraph failedLine = new Paragraph()
+                    .SetFontSize(11)
+                    .Add(new Text(" "))
+                    .Add(new Text(voucher.FailedDesc ?? "N/A")/*.SetUnderline(0.5f, -1)*/)
+                    .Add(new Text("  ")) // small space
+                    .Add(new Text(" and Total failed Amount: "))
+                    .Add(new Text((voucher.VAT ?? 0).ToString("N2"))/*.SetUnderline(0.5f, -1)*/);
+
+                doc.Add(failedLine);
+            }
+
+            // --- Amount in words ---
+            Paragraph wordsLine = new Paragraph()
                 .SetFontSize(11)
-                .Add(new Text(voucher.AmountInWords ?? "").SetUnderline(0.5f, -1))
-                .SetMarginBottom(0));
+                .Add(new Text("Amount in words: "))
+                .Add(new Text(voucher.AmountInWords ?? "").SetUnderline(0.5f, -1));
+            doc.Add(wordsLine);
 
             // --- Payment Made in ---
             string paymentText = (!string.IsNullOrEmpty(voucher.PaymentMode) &&
@@ -1177,10 +1230,11 @@ namespace Reports.Controllers
                 ? "Ksh B2C"
                 : "Ksh (Cash)";
 
-            doc.Add(new Paragraph("\nPayment Made in: ")
+            Paragraph paymentLine = new Paragraph()
                 .SetFontSize(11)
-                .Add(new Text(paymentText).SetUnderline(0.5f, -1)));
-
+                .Add(new Text("Payment Made in: "))
+                .Add(new Text(paymentText).SetUnderline(0.5f, -1));
+            doc.Add(paymentLine);
             // --- Signature Section ---   
             // === Prepared By ===
             var preparedByPara = new Paragraph("\nPrepared By: ")
@@ -1268,11 +1322,10 @@ namespace Reports.Controllers
                     venueTable.AddCell(new Cell().Add(new Paragraph(summary.Venue?.ToString())));
                     doc.Add(venueTable);
 
-                    // Itemized Table: Label | Qty | Unit Price | Total | Paid (optional)
+                    // Itemized Table
                     Table itemTable = new Table(UnitValue.CreatePercentArray(new float[] { 3, 1, 1, 2, 1 }))
                         .UseAllAvailableWidth();
 
-                    // Helper function to add a row
                     void AddRow(string label, int qty, decimal unitPrice, decimal total, bool showPaid)
                     {
                         itemTable.AddCell(new Paragraph(label));
@@ -1282,13 +1335,10 @@ namespace Reports.Controllers
                         itemTable.AddCell(new Paragraph(showPaid ? "PAID" : ""));
                     }
 
-                    // Add rows in same order as image
                     AddRow("HALL HIRE", summary.HallHireNo, summary.EachHallAmount, summary.HallHireTotal, summary.status == PaymentStatus.Paid);
                     AddRow("MPESA CHARGES", summary.HallHireNo, summary.MpesaChargesPerHall, summary.TotalMpesaChargesPerHall, summary.status == PaymentStatus.Paid);
-
                     AddRow("LEAD FARMERS", summary.LeadFarmersNo, summary.EachLeadFarmersAmount, summary.LeadFarmersTotal, false);
                     AddRow("MPESA CHARGES", summary.LeadFarmersNo, summary.MpesaChargesPerLeadFarmers, summary.TotalMpesaChargesPerLeadFarmers, false);
-
                     AddRow("E.A", summary.EANo, summary.EachEAAmount, summary.EATotal, false);
                     AddRow("MPESA CHARGES", summary.EANo, summary.MpesaChargesPerEA, summary.TotalMpesaChargesPerEA, false);
 
@@ -1309,30 +1359,52 @@ namespace Reports.Controllers
                 sumTable.AddCell(new Cell(4, 2).Add(new Paragraph("GRAND TOTAL").SetBold()));
                 sumTable.AddCell(new Cell(1, 2).Add(new Paragraph(grandTotal.ToString("N2")).SetBold()));
                 doc.Add(sumTable);
+
+                // 📌 Total Failed Amount & Description
+                decimal totalFailedAmount = voucher.Summaries.Sum(s => s.FailedAmt ?? 0);
+                if (totalFailedAmount > 0)
+                {
+                    string failedDescriptions = string.Join("; ", voucher.Summaries
+                        .Where(s => !string.IsNullOrEmpty(s.FailedDesc))
+                        .Select(s => s.FailedDesc));
+
+                    doc.Add(new Paragraph("\n"));
+                    doc.Add(new Paragraph($"Total Failed Amount: {totalFailedAmount:N2}"));
+
+                    if (!string.IsNullOrEmpty(failedDescriptions))
+                    {
+                        doc.Add(new Paragraph($"Failed Description: {failedDescriptions}"));
+                    }
+
+                    decimal netTotal = grandTotal - totalFailedAmount;
+                    doc.Add(new Paragraph($"Net Total (After Failed): {netTotal:N2}"));
+                }
             }
 
-
             // === Uploaded Files Section ===
-            var orderedFiles = voucher.UploadedFile
-            .OrderBy(f =>
-            {
-                var ext = Path.GetExtension(f.FilePath).ToLowerInvariant();
-                return ext switch
-                {
-                    ".pdf" => 1,  // scanned PDFs first
-                    ".xlsx" => 2, // then Excel
-                    ".docx" => 3, // then Word
-                    ".txt" => 4,  // then text
-                    ".jpg" or ".jpeg" or ".png" => 5, // images last
-                    _ => 6
-                };
-            })
-            .ThenBy(f => f.UploadedOn) // preserve upload order within same type
-            .ToList();
-
             if (voucher.UploadedFile != null && voucher.UploadedFile.Any())
             {
-                foreach (var file in voucher.UploadedFile.OrderBy(f => f.UploadedOn))
+                // ✅ Add page break only once BEFORE starting file output
+                //doc.Add(new AreaBreak());
+
+                var orderedFiles = voucher.UploadedFile
+                    .OrderBy(f =>
+                    {
+                        var ext = Path.GetExtension(f.FilePath).ToLowerInvariant();
+                        return ext switch
+                        {
+                            ".pdf" => 1,
+                            ".xlsx" => 2,
+                            ".docx" => 3,
+                            ".txt" => 4,
+                            ".jpg" or ".jpeg" or ".png" => 5,
+                            _ => 6
+                        };
+                    })
+                    .ThenBy(f => f.UploadedOn)
+                    .ToList();
+
+                foreach (var file in orderedFiles)
                 {
                     var physicalPath = Path.Combine(_env.WebRootPath, file.FilePath.TrimStart('/'));
                     if (!System.IO.File.Exists(physicalPath)) continue;
@@ -1366,8 +1438,6 @@ namespace Reports.Controllers
                     else if (ext == ".xlsx")
                     {
                         using var excelMs = new MemoryStream();
-
-                        // Generate a standalone PDF from Excel
                         using (var excelDoc = new PdfSharpCore.Pdf.PdfDocument())
                         {
                             AddExcelAsPdfTable(physicalPath, excelDoc);
@@ -1376,22 +1446,15 @@ namespace Reports.Controllers
 
                         excelMs.Position = 0;
 
-                        // Now import those pages into the main iText PDF
                         using var excelReader = new PdfReader(excelMs);
                         using var excelPdf = new iText.Kernel.Pdf.PdfDocument(excelReader);
-
                         excelPdf.CopyPagesTo(1, excelPdf.GetNumberOfPages(), pdf);
-
-                        doc.Add(new AreaBreak()); // separate sections
                     }
                 }
             }
 
             // Close main document
             doc.Close();
-
-            // Add page numbers
-            //AddPageNumbers(ms);
 
             //Return final PDF
             return File(ms.ToArray(), "application/pdf", $"Voucher_{voucher.VoucherNumber}_FullReport.pdf");

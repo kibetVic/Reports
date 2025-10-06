@@ -63,6 +63,7 @@
                                 <th>Farmers (Ksh)</th>
                                 <th>EATotal (Ksh)</th>
                                 <th>Venue (Ksh)</th>
+                                <th>Failed Amt</th>
                                 <th>Payment Status</th>
                                 <th class="text-center">Actions</th>
                             </tr>
@@ -85,6 +86,7 @@
                                         <td>@Html.DisplayFor(modelItem => item.LeadFarmersTotal)</td>
                                         <td>@Html.DisplayFor(modelItem => item.EATotal)</td>
                                         <td>@Html.DisplayFor(modelItem => item.SubTotalperVenue)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.FailedAmt)</td>
                                         <td>
                                             @if (item.status == Reports.Models.PaymentStatus.Paid)
                                             {

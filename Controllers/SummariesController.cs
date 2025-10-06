@@ -91,7 +91,7 @@ namespace Reports.Controllers
                     summary.EATotal = summary.EANo * summary.EachEAAmount;
                     summary.TotalMpesaChargesPerEA = summary.EANo * Convert.ToDecimal(summary.MpesaChargesPerEA);
 
-                    // Venue subtotal (all items + all mpesa charges)
+                    // Subtotal (before subtracting failed amount)
                     summary.SubTotalperVenue =
                         summary.HallHireTotal +
                         summary.TotalMpesaChargesPerHall +
@@ -100,12 +100,13 @@ namespace Reports.Controllers
                         summary.EATotal +
                         summary.TotalMpesaChargesPerEA;
 
-                    // If you still need TotalSum separately, keep it; otherwise remove
-                    summary.TotalSum = summary.SubTotalperVenue;
-
+                    // ✅ Always subtract FailedAmt (treat null as 0)
+                    decimal failedAmount = summary.FailedAmt ?? 0;
+                    summary.TotalSum = summary.SubTotalperVenue - failedAmount;
 
                     _context.Add(summary);
                     await _context.SaveChangesAsync();
+
                     TempData["SuccessMessage"] = "Summary created successfully!";
                     return RedirectToAction(nameof(Index));
                 }
@@ -127,7 +128,7 @@ namespace Reports.Controllers
             return View(summary);
         }
 
-        // GET: Summaries/Edit/5
+
         [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -175,7 +176,11 @@ namespace Reports.Controllers
                         summary.TotalMpesaChargesPerEA;
 
                     // If you still need TotalSum separately, keep it; otherwise remove
-                    summary.TotalSum = summary.SubTotalperVenue;
+                    //summary.TotalSum = summary.SubTotalperVenue;
+
+                    // ✅ Always subtract FailedAmt (treat null as 0)
+                    decimal failedAmount = summary.FailedAmt ?? 0;
+                    summary.TotalSum = summary.SubTotalperVenue - failedAmount;
 
                     _context.Update(summary);
                     await _context.SaveChangesAsync();
@@ -350,6 +355,66 @@ namespace Reports.Controllers
                 sumTable.AddCell(new Cell(5,2).Add(new Paragraph("SUM")));
                 sumTable.AddCell(new Cell().Add(new Paragraph(grandTotal.ToString("N2"))));
                 document.Add(sumTable);
+
+
+                // 📌 Total Failed Amount & Description (only if present)
+                decimal totalFailedAmount = summaries.Sum(s => s.FailedAmt ?? 0);
+
+                // ✅ Only add the following section if there is a failed amount > 0
+                if (totalFailedAmount > 0)
+                {
+                    string failedDescriptions = string.Join("; ", summaries
+                        .Where(s => !string.IsNullOrEmpty(s.FailedDesc))
+                        .Select(s => s.FailedDesc));
+
+                    // Add a line break before the failed section
+                    document.Add(new Paragraph("\n"));
+
+                    // ✅ Failed Amount statement
+                    document.Add(new Paragraph($"Total Failed Amount: {totalFailedAmount.ToString("N2")}"));
+
+                    // ✅ Failed Description (only if any exist)
+                    if (!string.IsNullOrEmpty(failedDescriptions))
+                    {
+                        document.Add(new Paragraph($"Description: {failedDescriptions}"));
+                    }
+
+                    // 📌 Net Total (Grand Total - Failed)
+                    decimal netTotal = grandTotal - totalFailedAmount;
+                    document.Add(new Paragraph($"Net Total (After Failed): {netTotal.ToString("N2")}"));
+                }
+
+
+                //// 📌 Total Failed Amount & Description
+                //decimal totalFailedAmount = summaries.Sum(s => s.FailedAmt ?? 0);
+                //string failedDescriptions = string.Join("; ", summaries
+                //    .Where(s => !string.IsNullOrEmpty(s.FailedDesc))
+                //    .Select(s => s.FailedDesc));
+
+                //Table failedTable = new Table(UnitValue.CreatePercentArray(new float[] { 2, 2 }))
+                //    .UseAllAvailableWidth();
+
+                //failedTable.AddCell(new Cell().Add(new Paragraph("TOTAL FAILED AMOUNT")));
+                //failedTable.AddCell(new Cell().Add(new Paragraph(totalFailedAmount.ToString("N2"))));
+
+                //if (!string.IsNullOrEmpty(failedDescriptions))
+                //{
+                //    failedTable.AddCell(new Cell().Add(new Paragraph("FAILED DESCRIPTION")));
+                //    failedTable.AddCell(new Cell().Add(new Paragraph(failedDescriptions)));
+                //}
+
+                //document.Add(failedTable);
+
+                //// 📌 Optional: Net Total (Grand Total - Failed)
+                //decimal netTotal = grandTotal - totalFailedAmount;
+                //Table netTable = new Table(UnitValue.CreatePercentArray(new float[] { 2, 2 }))
+                //    .UseAllAvailableWidth();
+
+                //netTable.AddCell(new Cell().Add(new Paragraph("NET TOTAL (After Failed)")));
+                //netTable.AddCell(new Cell().Add(new Paragraph(netTotal.ToString("N2"))));
+                //document.Add(netTable);
+
+
 
                 document.Close();
                 return File(ms.ToArray(), "application/pdf", $"{voucherName}_Summary.pdf");

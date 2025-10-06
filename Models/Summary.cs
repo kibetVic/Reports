@@ -13,9 +13,9 @@ namespace Reports.Models
         [ForeignKey(nameof(PaymentVoucherId))]
         [ValidateNever]
         public PaymentVoucher Voucher { get; set; }
-        //public int VenueId { get; set; }
-        //public virtual Venue? Venue { get; set; }
-        public string Venue { get; set; }
+        public decimal? FailedAmt { get; set; }
+        public string? FailedDesc { get; set; }
+        public string? Venue { get; set; }
         public int CountyId { get; set; }
         public virtual County? County { get; set; }
         public int HallHireNo { get; set; }

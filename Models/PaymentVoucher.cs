@@ -35,6 +35,8 @@ namespace Reports.Models
         [DataType(DataType.Currency)]
         public decimal? TotalAmount { get; set; }
         public decimal? VAT { get; set; }
+        //public decimal? FailedAmt { get; set; }
+        public string? FailedDesc { get; set; }
 
         [Display(Name = "Amount in Words")]
         public string? AmountInWords { get; set; }

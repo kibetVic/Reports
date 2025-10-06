@@ -72,6 +72,9 @@ namespace Reports.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FailedDesc")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PaymentInFavourOf")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -185,6 +188,12 @@ namespace Reports.Migrations
                     b.Property<decimal>("EachLeadFarmersAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal?>("FailedAmt")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("FailedDesc")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("HallHireNo")
                         .HasColumnType("int");
 
@@ -225,7 +234,6 @@ namespace Reports.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Venue")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("VenueId")
