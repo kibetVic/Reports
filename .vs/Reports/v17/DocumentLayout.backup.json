@@ -1,0 +1,198 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\2026\\Reports\\Reports\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\views\\certificates\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\views\\certificates\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\views\\useraccounts\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\views\\useraccounts\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\controllers\\certificatescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\controllers\\certificatescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\views\\useraccounts\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\views\\useraccounts\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\models\\certificate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\models\\certificate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\models\\useraccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\models\\useraccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\controllers\\invoicescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\controllers\\invoicescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\controllers\\useraccountscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\controllers\\useraccountscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|e:\\2026\\reports\\reports\\reports\\data\\reportsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2F175AA9-37D8-49F6-981B-8DB56832D71E}|Reports\\Reports.csproj|solutionrelative:reports\\data\\reportsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 113,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Register.cshtml",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Views\\UserAccounts\\Register.cshtml",
+              "RelativeDocumentMoniker": "Reports\\Views\\UserAccounts\\Register.cshtml",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Views\\UserAccounts\\Register.cshtml",
+              "RelativeToolTip": "Reports\\Views\\UserAccounts\\Register.cshtml",
+              "ViewState": "AgIAAGAAAAAAAAAAAAAAAHQAAABXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T11:51:39.722Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "UserAccount.cs",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Models\\UserAccount.cs",
+              "RelativeDocumentMoniker": "Reports\\Models\\UserAccount.cs",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Models\\UserAccount.cs",
+              "RelativeToolTip": "Reports\\Models\\UserAccount.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAA0wCwAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:57:20.167Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CertificatesController.cs",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Controllers\\CertificatesController.cs",
+              "RelativeDocumentMoniker": "Reports\\Controllers\\CertificatesController.cs",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Controllers\\CertificatesController.cs",
+              "RelativeToolTip": "Reports\\Controllers\\CertificatesController.cs",
+              "ViewState": "AgIAACEBAAAAAAAAAADwv+MAAABbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T11:55:51.397Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Views\\UserAccounts\\Login.cshtml",
+              "RelativeDocumentMoniker": "Reports\\Views\\UserAccounts\\Login.cshtml",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Views\\UserAccounts\\Login.cshtml",
+              "RelativeToolTip": "Reports\\Views\\UserAccounts\\Login.cshtml",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAowJkAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T08:47:08.738Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Views\\Certificates\\Index.cshtml",
+              "RelativeDocumentMoniker": "Reports\\Views\\Certificates\\Index.cshtml",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Views\\Certificates\\Index.cshtml",
+              "RelativeToolTip": "Reports\\Views\\Certificates\\Index.cshtml",
+              "ViewState": "AgIAABEBAAAAAAAAAAAAACgBAABUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T07:59:56.63Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Certificate.cs",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Models\\Certificate.cs",
+              "RelativeDocumentMoniker": "Reports\\Models\\Certificate.cs",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Models\\Certificate.cs",
+              "RelativeToolTip": "Reports\\Models\\Certificate.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAA9wCEAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T11:33:40.941Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "UserAccountsController.cs",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Controllers\\UserAccountsController.cs",
+              "RelativeDocumentMoniker": "Reports\\Controllers\\UserAccountsController.cs",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Controllers\\UserAccountsController.cs",
+              "RelativeToolTip": "Reports\\Controllers\\UserAccountsController.cs",
+              "ViewState": "AgIAAC8BAAAAAAAAAAASwDsBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T08:56:39.067Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "InvoicesController.cs",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Controllers\\InvoicesController.cs",
+              "RelativeDocumentMoniker": "Reports\\Controllers\\InvoicesController.cs",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Controllers\\InvoicesController.cs",
+              "RelativeToolTip": "Reports\\Controllers\\InvoicesController.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA4AAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T09:06:47.187Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ReportsDbContext.cs",
+              "DocumentMoniker": "E:\\2026\\Reports\\Reports\\Reports\\Data\\ReportsDbContext.cs",
+              "RelativeDocumentMoniker": "Reports\\Data\\ReportsDbContext.cs",
+              "ToolTip": "E:\\2026\\Reports\\Reports\\Reports\\Data\\ReportsDbContext.cs",
+              "RelativeToolTip": "Reports\\Data\\ReportsDbContext.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAA8wBgAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T11:50:52.005Z"
+            }
+          ]
+        },
+        {
+          "DockedHeight": 57,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
