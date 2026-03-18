@@ -1,0 +1,158 @@
+﻿@model IEnumerable<Reports.Models.Quotation>
+@using Reports.Models
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Quotations";
+
+    // ✅ Get user role from session
+    var userRoleString = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+    bool isNormalUser = string.Equals(userRoleString, UserRole.User.ToString(), StringComparison.OrdinalIgnoreCase);
+}
+
+<style>
+    /* Optimize table readability */
+    .table td,
+    .table th {
+        padding: 6px 10px !important;
+        font-size: 13px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    /* Wrap action buttons nicely */
+    .btn-group-sm .btn {
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-light border-bottom mb-3">
+
+            <!-- 🔝 Header Title -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold text-primary mb-0">📄 Quotation List</h4>
+            </div>
+
+            <!-- 🔎 Search + Actions (Responsive) -->
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                <!-- Search bar -->
+                <div class="d-flex gap-2 flex-grow-1">
+                    <input type="search" id="searchBox" class="form-control" placeholder="🔎 Search by voucher, payee, mode, etc..." />
+                    <button type="button" id="clearSearch" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Reset
+                    </button>
+                </div>
+
+                <!-- Action Buttons (hidden for Users) -->
+                @if (!isNormalUser)
+                {
+                    <div class="d-flex gap-2 ms-3">
+                        <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+                            <i class="bi bi-plus-circle me-1"></i> + New Quotation
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-primary text-center">
+                        <tr class="text-center">
+                            @if (!isNormalUser)
+                            {
+                                <th></th>
+                            }
+                            <th>Quotation</th>
+                            <th>Client Name</th>
+                            <th>Phone</th>
+                            <th>Date</th>
+                            <th>VAT (16%)</th>
+                            <th>Total Amount (Ksh)</th>
+                            @if (!isNormalUser)
+                            {
+                                <th>Action</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var q in Model)
+                        {
+                            <tr class="text-center">
+                                @if (!isNormalUser)
+                                {
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@q.Id" class="text-decoration-underline text-primary">
+                                            Select
+                                        </a>
+                                    </td>
+                                }
+
+                                <td>@q.QuotationNumber</td>
+                                <td>@q.ClientName</td>
+                                <td>@q.PhoneNomber</td>
+                                <td>@q.DateCreated.ToShortDateString()</td>
+                                <td>@q.VAT.ToString("N2")</td>
+                                <td>@q.TotalAmount.ToString("N2")</td>
+
+                                @if (!isNormalUser)
+                                {
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@q.Id" class="btn btn-sm btn-info">View</a>
+                                        <a asp-action="Delete" asp-route-id="@q.Id" class="btn btn-sm btn-danger">Delete</a>
+                                        <a asp-action="GeneratePdf" asp-route-id="@q.Id" class="btn btn-success btn-sm">
+                                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                                        </a>
+                                        <a asp-action="GenerateReceiptPdf" asp-route-id="@q.Id" class="btn btn-success btn-sm">
+                                            <i class="bi bi-file-earmark-pdf"></i> Receipt
+                                        </a>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const searchBox = document.getElementById('searchBox');
+            const clearBtn = document.getElementById('clearSearch');
+            const table = document.querySelector('table');
+            const rows = table.querySelectorAll('tbody tr');
+
+            function normalize(s) { return (s || '').toString().toLowerCase(); }
+
+            function filterRows() {
+                const q = normalize(searchBox.value);
+
+                rows.forEach(row => {
+                    const text = normalize(row.innerText);
+                    row.hidden = !(q === '' || text.includes(q));
+                });
+            }
+
+            searchBox.addEventListener('input', filterRows);
+            clearBtn.addEventListener('click', function () {
+                searchBox.value = '';
+                filterRows();
+            });
+
+            filterRows();
+
+            // Auto close alerts if any
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    new bootstrap.Alert(alert).close();
+                });
+            }, 4000);
+        })();
+    </script>
+}

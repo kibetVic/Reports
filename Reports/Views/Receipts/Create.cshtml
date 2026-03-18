@@ -1,0 +1,150 @@
+﻿@model Reports.Models.Receipt
+@{
+    ViewData["Title"] = "Create Receipt";
+}
+
+<div class="container py-4">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4">
+            <h3 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i>Receipt Form</h3>
+        </div>
+
+        <div class="card-body bg-light p-4">
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger">
+                    <strong>Error Details:</strong> @ViewBag.ErrorMessage
+                </div>
+            }
+
+            <form asp-action="Create" method="post">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label asp-for="ReceiptNumber" class="form-label fw-bold text-muted"></label>
+                        <input asp-for="ReceiptNumber" class="form-control" readonly />
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="ClientName" class="form-label fw-bold text-muted"></label>
+                        <input asp-for="ClientName" class="form-control" required placeholder="Enter client name" />
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="PhoneNomber" class="form-label fw-bold text-muted"></label>
+                        <input asp-for="PhoneNomber" class="form-control" required placeholder="Enter phone number" />
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Status" class="form-label fw-bold text-muted"></label>
+                        <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<Reports.Models.ReceiptStatus>()">
+                            <option value="">-- Select Status --</option>
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="RefferenceNo" class="form-label fw-bold text-muted"></label>
+                        <textarea asp-for="RefferenceNo" class="form-control" rows="3" required style="width:100%; min-width:400px; height:40px;"
+                        placeholder="Enter reference or cheque number (optional)"></textarea>
+                        <span asp-validation-for="RefferenceNo" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr class="mt-4" />
+                <h5 class="fw-bold text-primary mb-0"><i class="bi bi-cart4 me-2"></i>Receipt Items</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle" id="itemsTable">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>Description</th>
+                                <th style="width: 90px;">Qty</th>
+                                <th style="width: 150px;">Price per Qty</th>
+                                <th style="width: 150px;">Amount (Ksh)</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="width: 45%;">
+                                    <textarea name="Items[0].Description" class="form-control"
+                                              required  style="width:100%; min-width:400px; height:40px;"> </textarea>
+                                </td>
+                                <td><input name="Items[0].Qty" type="number" class="form-control qty" required /></td>
+                                <td><input name="Items[0].PricePerQty" type="number" class="form-control price" required /></td>
+                                <td><input name="Items[0].Amount" type="number" class="form-control amount" readonly /></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-danger removeRow">
+                                        <i class="bi bi-trash">Remove</i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <button type="button" id="addRow" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus-circle"></i> Add Item
+                    </button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="AddVAT" name="AddVAT" value="true" />
+                        <label class="form-check-label fw-semibold" for="AddVAT">
+                            Add 16% VAT
+                        </label>
+                    </div>
+                    <div>
+                        <a asp-action="Index" class="btn btn-outline-secondary me-2">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-save2"></i> Save Receipt
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let rowIndex = 1;
+
+        document.getElementById("addRow").addEventListener("click", () => {
+            const table = document.querySelector("#itemsTable tbody");
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+                <td><textarea name="Items[${rowIndex}].Description" class="form-control" rows="2" required></textarea></td>
+                <td><input name="Items[${rowIndex}].Qty" type="number" class="form-control qty" required /></td>
+                <td><input name="Items[${rowIndex}].PricePerQty" type="number" class="form-control price" required /></td>
+                <td><input name="Items[${rowIndex}].Amount" type="number" class="form-control amount" readonly /></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-danger removeRow">
+                        <i class="bi bi-trash">Remove</i>
+                    </button>
+                </td>
+            `;
+            table.appendChild(newRow);
+            rowIndex++;
+        });
+
+        document.addEventListener("click", (e) => {
+            if (e.target.closest(".removeRow")) {
+                e.target.closest("tr").remove();
+            }
+        });
+
+        document.addEventListener("input", (e) => {
+            if (e.target.classList.contains("qty") || e.target.classList.contains("price")) {
+                const row = e.target.closest("tr");
+                const qty = parseFloat(row.querySelector(".qty").value) || 0;
+                const price = parseFloat(row.querySelector(".price").value) || 0;
+                row.querySelector(".amount").value = (qty * price).toFixed(2);
+            }
+        });
+    </script>
+}

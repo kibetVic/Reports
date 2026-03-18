@@ -1,0 +1,51 @@
+﻿@model Reports.Models.UploadedFile
+@{
+    ViewData["Title"] = "Delete File";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <h5 class="mb-0">Delete File</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="alert alert-danger d-flex align-items-center">
+                <i class="bi bi-trash me-2 fs-4"></i>
+                <div>
+                    <strong>Are you sure?</strong> This action cannot be undone.
+                    The file will be permanently deleted from the system.
+                </div>
+            </div>
+
+            <dl class="row">
+                <dt class="col-sm-3 fw-bold">File Name</dt>
+                <dd class="col-sm-9">@Model.FileName</dd>
+
+                <dt class="col-sm-3 fw-bold">File Type</dt>
+                <dd class="col-sm-9">@Model.FileType</dd>
+
+                <dt class="col-sm-3 fw-bold">File Path</dt>
+                <dd class="col-sm-9">
+                    <a href="@Model.FilePath" target="_blank" class="text-decoration-none">
+                        <i class="bi bi-link-45deg"></i> @Model.FilePath
+                    </a>
+                </dd>
+            </dl>
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <form asp-action="DeleteConfirmed" method="post" class="m-0">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-check-circle"></i> Yes, Delete
+                </button>
+            </form>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Cancel
+            </a>
+        </div>
+    </div>
+</div>
+

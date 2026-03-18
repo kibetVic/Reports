@@ -1,0 +1,156 @@
+﻿@model Reports.Models.Invoice
+@{
+    ViewData["Title"] = "Edit Invoice";
+}
+
+<div class="container mt-4">
+    <h2>Invoice Form</h2>
+    <hr />
+    <form asp-action="Edit" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <!-- Hidden ID field -->
+        <input type="hidden" asp-for="InvoiceId" />
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="TrxDate" class="form-label">Date</label>
+                <input asp-for="TrxDate" class="form-control" type="date" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="InvoiceTo" class="form-label">Invoice To</label>
+                <textarea asp-for="InvoiceTo" class="form-control" style="width:100%; min-width:300px; height:30px;" ></textarea>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="VATREGNO" class="form-label">VAT REG NO</label>
+                <input asp-for="VATREGNO" class="form-control" />
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label asp-for="Project" class="form-label">Project</label>
+                <input asp-for="Project" class="form-control" />
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label asp-for="Terms" class="form-label">Terms</label>
+                <textarea asp-for="Terms" class="form-control" style="width:100%; min-width:200px; height:30px;"></textarea>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label asp-for="Credits" class="form-label">Credits</label>
+                <input asp-for="Credits" class="form-control" />
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label asp-for="PONO" class="form-label">P.O Number</label>
+                <input asp-for="PONO" class="form-control" placeholder="Enter Pin/Optional" />
+            </div>
+        </div>
+
+        <h4>Invoice Items</h4>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <!-- ✅ Added id="itemsTable" -->
+                <table class="table table-striped table-hover mb-0 align-middle" id="itemsTable">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>VAT</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Items != null && Model.Items.Count > 0)
+                        {
+                            for (int i = 0; i < Model.Items.Count; i++)
+                            {
+                                <tr>
+                                    <td style="width: 40%;"> <textarea asp-for="Items[@i].Description" class="form-control"
+                                                  placeholder="Enter description" style="width:100%; min-width:300px; height:50px;"></textarea>
+                                    </td>
+                                    <td><input asp-for="Items[i].Quantity" class="form-control" /></td>
+                                    <td><input asp-for="Items[i].Rate" class="form-control" /></td>
+                                    <td><input asp-for="Items[i].VatAmount" class="form-control" /></td>
+                                    <td><button type="button" class="btn btn-danger removeItem">X</button></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-primary mt-2" id="addItem">+ Add Item</button>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-outline-success">Save Invoice</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- ✅ Template for new rows -->
+<script type="text/template" id="item-template">
+    <tr>
+        <td><textarea name="Items[__index__].Description" class="form-control" placeholder="Description" ></textarea></td>
+        <td><input name="Items[__index__].Quantity" class="form-control" type="number" value="1" /></td>
+        <td><input name="Items[__index__].Rate" class="form-control" type="number" step="0.01" value="0.00" /></td>
+        <td><input name="Items[__index__].VatAmount" class="form-control" type="number" step="0.01" value="0.00" /></td>
+        <td><button type="button" class="btn btn-danger removeItem">X</button></td>
+    </tr>
+</script>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addBtn = document.getElementById('addItem');
+            const tbody = document.querySelector('#itemsTable tbody');
+            const template = document.getElementById('item-template').innerHTML;
+
+            // 🔄 Ensure indexes are correct on load
+            updateIndexes();
+
+            addBtn.addEventListener('click', function () {
+                const idx = tbody.querySelectorAll('tr').length;
+                const rowHtml = template.replace(/__index__/g, idx);
+                tbody.insertAdjacentHTML('beforeend', rowHtml);
+                updateIndexes();
+                parseUnobtrusive(tbody);
+            });
+
+            // ❌ Remove row
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('removeItem')) {
+                    e.target.closest('tr').remove();
+                    updateIndexes();
+                }
+            });
+
+            // 🔁 Re-index all inputs so model binding stays correct
+            function updateIndexes() {
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach((tr, i) => {
+                    tr.querySelectorAll('input, select, textarea').forEach(inp => {
+                        const name = inp.getAttribute('name');
+                        if (name) {
+                            inp.setAttribute('name', name.replace(/Items\[\d+\]/, `Items[${i}]`));
+                        }
+                        const id = inp.getAttribute('id');
+                        if (id) {
+                            inp.setAttribute('id', id.replace(/Items_\d+__/, `Items_${i}__`));
+                        }
+                    });
+                });
+            }
+
+            // ✅ Re-parse unobtrusive validation for new elements
+            function parseUnobtrusive(container) {
+                if (window.jQuery && jQuery.validator && jQuery.validator.unobtrusive) {
+                    jQuery.unobtrusive.parse(container);
+                }
+            }
+        });
+    </script>
+}

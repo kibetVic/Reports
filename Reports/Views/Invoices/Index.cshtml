@@ -1,0 +1,127 @@
+﻿@model IEnumerable<Reports.Models.Invoice>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Invoices";
+    var userRole = HttpContextAccessor.HttpContext.Session.GetString("UserRole");
+    bool isNormalUser = userRole == "User";
+}
+
+<style>
+    .table td,
+    .table th {
+        padding: 6px 10px !important;
+        font-size: 13px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .btn-group-sm .btn {
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="mb-0">Invoices</h2>
+
+        <!-- 🔎 Search + Clear -->
+        <div class="input-group" style="max-width: 350px;">
+            <input type="text" id="invoiceSearch" class="form-control" placeholder="Search invoice...">
+            <button type="button" class="btn btn-outline-secondary" id="clearSearch">Clear</button>
+        </div>
+
+        <!-- ✅ Only show “New Invoice” if NOT a normal user -->
+        @if (!isNormalUser)
+        {
+            <a class="btn btn-primary" asp-action="Create">+ New Invoice</a>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 align-middle" id="invoiceTable">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            @if (!isNormalUser)
+                            {
+                                <th></th>
+                            }
+                            <th>Invoice No</th>
+                            <th>Invoice To</th>
+                            <th>Project</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            @if (!isNormalUser)
+                            {
+                                <th class="text-center">Actions</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderByDescending(i => i.InvoiceNumber))
+                        {
+                            <tr>
+                                @if (!isNormalUser)
+                                {
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@item.InvoiceId" class="text-decoration-underline text-primary">Select</a>
+                                    </td>
+                                }
+                                <td>@item.InvoiceNumber</td>
+                                <td>@item.InvoiceTo</td>
+                                <td>@item.Project</td>
+                                <td>@item.TrxDate.ToShortDateString()</td>
+                                <td>@item.TotalAmount?.ToString("N2")</td>
+                                @if (!isNormalUser)
+                                {
+                                    <td>
+                                        <div class="text-center">
+                                            <a asp-action="Details" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-info">View</a>
+                                            <a asp-action="Delete" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-danger">Delete</a>
+                                            <a asp-action="GeneratePdf" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-success">Export PDF</a>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById("invoiceSearch");
+        const clearBtn = document.getElementById("clearSearch");
+        const rows = document.querySelectorAll("#invoiceTable tbody tr");
+
+        // 🔎 Live search filter
+        searchInput.addEventListener("keyup", function () {
+            let filter = this.value.toLowerCase();
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(filter) ? "" : "none";
+            });
+        });
+
+        // 🧹 Clear search
+        clearBtn.addEventListener("click", function () {
+            searchInput.value = "";
+            rows.forEach(row => row.style.display = ""); // show all rows again
+            searchInput.focus();
+        });
+    </script>
+}

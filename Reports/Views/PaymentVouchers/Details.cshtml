@@ -1,0 +1,51 @@
+﻿@model Reports.Models.PaymentVoucher
+
+@{
+    ViewData["Title"] = "Payment Voucher Details";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm rounded-3">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Payment Voucher Details</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row mb-3">
+                <dt class="col-sm-3">Voucher Number</dt>
+                <dd class="col-sm-9">@Model.VoucherNumber</dd>
+
+                <dt class="col-sm-3">Cheque Number</dt>
+                <dd class="col-sm-9">@Model.ChequeNo</dd>
+
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-9">@Model.Date.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-3">Payment Mode</dt>
+                <dd class="col-sm-9">@Model.PaymentMode</dd>
+
+                <dt class="col-sm-3">Payment In Favour Of</dt>
+                <dd class="col-sm-9">@Model.PaymentInFavourOf</dd>
+
+                <dt class="col-sm-3">Total Amount</dt>
+                <dd class="col-sm-9">@Model.TotalAmount?.ToString("C")</dd>
+
+                <dt class="col-sm-3">Amount in Words</dt>
+                <dd class="col-sm-9">@Model.AmountInWords</dd>
+
+                <dt class="col-sm-3">Prepared By</dt>
+                <dd class="col-sm-9">@Model.PreparedBy</dd>
+
+                <dt class="col-sm-3">Checked By</dt>
+                <dd class="col-sm-9">@Model.CheckedBy</dd>
+
+                <dt class="col-sm-3">Approved By</dt>
+                <dd class="col-sm-9">@Model.ApprovedBy</dd>
+            </dl>         
+
+            <div class="mt-3">
+                <a asp-action="Edit" asp-route-id="@Model.PaymentVoucherId" class="btn btn-warning me-2">Edit</a>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>

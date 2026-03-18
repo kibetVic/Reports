@@ -1,0 +1,18 @@
+﻿@model Reports.Models.Quotation
+@{
+    ViewData["Title"] = "Delete Quotation";
+}
+
+<h2>Delete Quotation</h2>
+
+<div class="alert alert-danger mt-3">
+    <strong>Are you sure</strong> you want to delete quotation <strong>@Model.QuotationNumber</strong> for <strong>@Model.ClientName</strong>?
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="text-end">
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>

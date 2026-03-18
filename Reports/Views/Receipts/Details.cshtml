@@ -1,0 +1,50 @@
+﻿@model Reports.Models.Receipt
+@{
+    ViewData["Title"] = "Receipt Details";
+}
+
+<h2>Receipt Details</h2>
+
+<div class="card shadow p-4 mt-3">
+    <h5>Client Information</h5>
+    <p><strong>Receipt #:</strong> @Model.ReceiptNumber</p>
+    <p><strong>Client Name:</strong> @Model.ClientName</p>
+    <p><strong>Phone:</strong> @Model.PhoneNomber</p>
+    <p><strong>REF/CHEQUE:</strong> @Model.RefferenceNo</p>
+    <p><strong>Date Created:</strong> @Model.DateCreated.ToShortDateString()</p>
+
+    <hr />
+    <h5>Items</h5>
+    <table class="table table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Price per Qty</th>
+                <th>Amount (Ksh)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Description</td>
+                    <td>@item.Qty</td>
+                    <td>@item.PricePerQty</td>
+                    <td>@item.Amount.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="text-end">
+        <p><strong>Subtotal:</strong> @Model.SubTotal.ToString("N2")</p>
+        <p><strong>VAT (16%):</strong> @Model.VAT</p>
+        <p><strong>Total:</strong> <span class="fw-bold">@Model.TotalAmount.ToString("N2")</span></p>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    </div>
+</div>

@@ -1,0 +1,126 @@
+﻿@model Reports.Models.Invoice
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<div class="container mt-4">
+    <h2>Invoice Form</h2>
+    <hr />
+
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="TrxDate" class="form-label">Date</label>
+                <input asp-for="TrxDate" class="form-control" type="date" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="InvoiceTo" class="form-label">Invoice To</label>
+                <textarea asp-for="InvoiceTo" class="form-control" style="width:100%; min-width:300px; height:30px;"></textarea>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label asp-for="VATREGNO" class="form-label">VAT REG NO</label>
+                <input asp-for="VATREGNO" class="form-control" />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label asp-for="Project" class="form-label">Project</label>
+                <input asp-for="Project" class="form-control" />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label asp-for="Terms" class="form-label">Terms</label>
+                <textarea asp-for="Terms" class="form-control" style="width:100%; min-width:200px; height:30px;" ></textarea>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label asp-for="Credits" class="form-label">Credits</label>
+                <input asp-for="Credits" class="form-control" />
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label asp-for="PONO" class="form-label">Pin number</label>
+                <input asp-for="PONO" class="form-control" placeholder="Enter P.O.NO" />
+            </div>
+        </div>
+
+        <h4>Invoice Items</h4>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 align-middle" id="itemsTable">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>VAT</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Items != null && Model.Items.Count > 0)
+                        {
+                            for (int i = 0; i < Model.Items.Count; i++)
+                            {
+                                <tr>
+                                    <td style="width: 40%;"><textarea asp-for="Items[@i].Description" class="form-control"
+                                        placeholder="Enter description" style="width:100%; min-width:300px; height:50px;"></textarea>
+                                    </td>
+                                    <td><input asp-for="Items[@i].Quantity" class="form-control" /></td>
+                                    <td><input asp-for="Items[@i].Rate" class="form-control" /></td>
+                                    <td><input asp-for="Items[@i].VatAmount" class="form-control" /></td>
+                                    <td><button type="button" class="btn btn-danger removeItem">X</button></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-primary mt-2" id="addItem">+ Add Item</button>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-outline-success">Save Invoice</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("addItem").addEventListener("click", function () {
+            // ✅ Count existing rows to keep indexes correct
+            var index = document.querySelectorAll("#itemsTable tbody tr").length;
+
+            // ✅ Create new row HTML
+            var newRow = `
+                <tr>
+                    <td><textarea name="Items[${index}].Description" class="form-control" placeholder="Enter description" ></textarea></td>
+                    <td><input name="Items[${index}].Quantity" class="form-control" type="number" value="1" /></td>
+                    <td><input name="Items[${index}].Rate" class="form-control" type="number" step="0.01" value="0.00" /></td>
+                    <td><input name="Items[${index}].VatAmount" class="form-control" type="number" step="0.01" value="0.00" /></td>
+                    <td><button type="button" class="btn btn-danger removeItem">X</button></td>
+                </tr>
+            `;
+
+            // ✅ Add row to table
+            document.querySelector("#itemsTable tbody").insertAdjacentHTML("beforeend", newRow);
+        });
+
+        // ✅ Event delegation for removing rows
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("removeItem")) {
+                e.target.closest("tr").remove();
+                // Re-index all rows after removal to keep model binding correct
+                document.querySelectorAll("#itemsTable tbody tr").forEach((row, i) => {
+                    row.querySelectorAll("input").forEach(input => {
+                        var field = input.name.split('.')[1];
+                        input.name = `Items[${i}].${field}`;
+                    });
+                });
+            }
+        });
+    </script>
+}

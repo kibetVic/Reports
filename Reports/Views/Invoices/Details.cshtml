@@ -1,0 +1,61 @@
+﻿@model Reports.Models.Invoice
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Invoice Details";
+}
+
+<div class="container mt-4">
+    <h2>Invoice Details</h2>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">Invoice Number</dt>
+        <dd class="col-sm-9">@Model.InvoiceNumber</dd>
+
+        <dt class="col-sm-3">Invoice To</dt>
+        <dd class="col-sm-9">@Model.InvoiceTo</dd>
+
+        <dt class="col-sm-3">Project</dt>
+        <dd class="col-sm-9">@Model.Project</dd>
+
+        <dt class="col-sm-3">Date</dt>
+        <dd class="col-sm-9">@Model.TrxDate.ToShortDateString()</dd>
+    </dl>
+
+    <h4>Items</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>VAT</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Description</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Rate.ToString("N2")</td>
+                    <td>@item.VatAmount.ToString("N2")</td>
+                    <td>@item.Amount.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4 class="mt-3">Summary</h4>
+    <table class="table">
+        <tr><th>Subtotal</th><td>@Model.SubTotal?.ToString("N2")</td></tr>
+        <tr><th>VAT Total</th><td>@Model.VatTotal?.ToString("N2")</td></tr>
+        <tr><th>Credits</th><td>@Model.Credits?.ToString("N2")</td></tr>
+        <tr><th>Total Amount</th><td><strong>@Model.TotalAmount?.ToString("N2")</strong></td></tr>
+    </table>
+    <a asp-action="Edit" asp-route-id="@Model?.InvoiceId" class="btn btn-outline-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+</div>

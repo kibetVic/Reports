@@ -1,0 +1,258 @@
+﻿@model Reports.Models.ViewModels.DashboardViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="container-fluid py-4">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold display-6 text-primary">Payment & Disbursement Dashboard</h1>
+            <p class="text-muted fs-6">Visual insights into payment performance, spending, and trends.</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row g-4 mb-5 text-center">
+
+            <div class="col-md-3 col-6">
+                <div class="card shadow-sm border-0 bg-warning text-white">
+                    <div class="card-body p-3">
+                        <h3 class="fw-bold">@Model.TotalLeadFarmersCount</h3>
+                        <p class="mb-0">Total Lead Farmers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="card shadow-sm border-0 bg-danger text-white">
+                    <div class="card-body p-3 text-center">
+                        <h3 class="fw-bold">@Model.HallHireTotals.Sum().ToString("N2")</h3>
+                        <p class="mb-0">Total Venue Transactions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card shadow-sm border-0 bg-success text-white">
+                    <div class="card-body p-3">
+                        <h3 class="fw-bold">@Model.TotalLeadFarmersSpending.ToString("N2")</h3>
+                        <p class="mb-0">Lead Farmers Spending</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card shadow-sm border-0 bg-info text-white">
+                    <div class="card-body p-3">
+                        <h3 class="fw-bold">@Model.TotalEASpending.ToString("N2")</h3>
+                        <p class="mb-0">EA Spending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row g-4">
+            <div class="col-lg-6 col-md-12">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-light py-2">
+                        <h6 class="mb-0 fw-semibold">🏢 Venue Breakdown — Mpesa, Farmers & EA Totals</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="venueBarChart" style="max-height:300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-light py-2">
+                        <h6 class="mb-0 fw-semibold">📈 Hall Hire Trends Over Time</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="hallHireLineChart" style="max-height:300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-lg-6 col-md-12">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-light py-2">
+                        <h6 class="mb-0 fw-semibold">🥧 Spending Split — Lead Farmers vs EA vs Hall Hire</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="spendingPieChart" style="max-height:280px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-light py-2">
+                        <h6 class="mb-0 fw-semibold">🍩 Payment Status — Paid vs Unpaid</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusDoughnutChart" style="max-height:280px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 🧩 Global chart instances
+        let venueLineChart, hallHireLineChart, statusDoughnutChart, spendingPieChart;
+
+        function renderCharts() {
+            // 📊 Data from Razor model
+            const venueLabels = @Html.Raw(JsonSerializer.Serialize(Model.VenueLabels));
+            const mpesaValues = @Html.Raw(JsonSerializer.Serialize(Model.TotalMpesaCharges));
+            const farmerValues = @Html.Raw(JsonSerializer.Serialize(Model.TotalFarmers));
+            const eaValues = @Html.Raw(JsonSerializer.Serialize(Model.TotalEA));
+
+            const trendLabels = @Html.Raw(JsonSerializer.Serialize(Model.TrendMonths));
+            const hallHireTotals = @Html.Raw(JsonSerializer.Serialize(Model.HallHireTotals));
+
+            const paidCount = @Model.PaidCount;
+            const unpaidCount = @Model.UnpaidCount;
+
+            const leadFarmersSpending = @Model.TotalLeadFarmersSpending;
+            const eaSpending = @Model.TotalEASpending;
+            const hallHireSpending = @Model.TotalHallHireSpending;
+
+            // 🧹 Destroy old charts before recreating to prevent duplication
+            [venueLineChart, hallHireLineChart, statusDoughnutChart, spendingPieChart].forEach(chart => {
+                if (chart) chart.destroy();
+            });
+
+            // 🏢 Venue Breakdown — Line Chart
+            venueLineChart = new Chart(document.getElementById("venueBarChart").getContext("2d"), {
+                type: 'line',
+                data: {
+                    labels: venueLabels,
+                    datasets: [
+                        {
+                            label: 'Total Mpesa Charges',
+                            data: mpesaValues,
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0,123,255,0.15)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Lead Farmers Total',
+                            data: farmerValues,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40,167,69,0.15)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'EA Total',
+                            data: eaValues,
+                            borderColor: '#ffc107',
+                            backgroundColor: 'rgba(255,193,7,0.15)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 3,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    animation: { duration: 800 },
+                    plugins: {
+                        tooltip: { enabled: true },
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 10 }
+                        },
+                        x: {
+                            ticks: { autoSkip: false, maxRotation: 45, minRotation: 30 }
+                        }
+                    }
+                }
+            });
+
+            // 📈 Hall Hire Trends — Line Chart
+            hallHireLineChart = new Chart(document.getElementById("hallHireLineChart").getContext("2d"), {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Hall Hire Total',
+                        data: hallHireTotals,
+                        borderColor: '#17a2b8',
+                        backgroundColor: 'rgba(23,162,184,0.15)',
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: { duration: 800 },
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 🍩 Payment Status — Doughnut Chart
+            statusDoughnutChart = new Chart(document.getElementById("statusDoughnutChart").getContext("2d"), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Paid', 'Unpaid'],
+                    datasets: [{
+                        data: [paidCount, unpaidCount],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: { duration: 800 },
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+
+            // 🥧 Spending Split — Pie Chart
+            spendingPieChart = new Chart(document.getElementById("spendingPieChart").getContext("2d"), {
+                type: 'pie',
+                data: {
+                    labels: ['Lead Farmers', 'EA', 'Hall Hire'],
+                    datasets: [{
+                        data: [leadFarmersSpending, eaSpending, hallHireSpending],
+                        backgroundColor: ['#20c997', '#6610f2', '#ffc107']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: { duration: 800 },
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+        }
+
+        // 🚀 Initialize all charts on load
+        document.addEventListener("DOMContentLoaded", renderCharts);
+    </script>
+}
+
+
+

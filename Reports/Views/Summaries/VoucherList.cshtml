@@ -1,0 +1,99 @@
+﻿@model IEnumerable<dynamic>
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Voucher Summaries";
+    var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole");
+    bool isUser = userRole?.Equals("User", StringComparison.OrdinalIgnoreCase) ?? false;
+}
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-primary mb-0">Voucher Summaries</h2>
+        <a asp-action="Index" asp-controller="Summaries" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to summary list
+        </a>
+    </div>
+
+    <!-- Search bar -->
+    <div class="d-flex gap-2 flex-wrap mb-3 align-items-center">
+        <div class="d-flex gap-2 flex-grow-1">
+            <input type="text" id="searchInput" class="form-control"
+                   placeholder="Search by voucher name..." />
+            <button type="button" id="clearBtn" class="btn btn-outline-primary">
+                <i class="bi bi-x-circle"></i> Reset
+            </button>
+        </div>
+    </div>
+
+    <table class="table table-striped table-hover align-middle mb-0" id="voucherTable">
+        <thead class="table-primary">
+            <tr class="text-secondary">
+                <th>No.</th>
+                <th>Voucher Name</th>
+                <th>Summaries Count</th>
+                @if (!isUser)
+                {
+                    <th>Actions</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                var counter = 1;
+                foreach (var item in Model.Reverse()) // latest first
+                {
+                    <tr>
+                        <td>@counter</td>
+                        <td>@item.VoucheName</td>
+                        <td>@item.Count</td>
+                        @if (!isUser)
+                        {
+                            <td>
+                                <a asp-action="GenerateSummaryPdf"
+                                   asp-route-voucherName="@item.VoucheName"
+                                   class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-file-earmark-pdf"></i> Download PDF
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                    counter++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="@(isUser ? 3 : 4)" class="text-center text-muted">
+                        No voucher summaries found.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const clearBtn = document.getElementById("clearBtn");
+        const rows = document.querySelectorAll("#voucherTable tbody tr");
+
+        // 🔍 Filter rows while typing
+        searchInput.addEventListener("keyup", function () {
+            const value = this.value.toLowerCase();
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(value) ? "" : "none";
+            });
+        });
+
+        // ❌ Reset search
+        clearBtn.addEventListener("click", function () {
+            searchInput.value = "";
+            rows.forEach(row => row.style.display = "");
+            searchInput.focus();
+        });
+    </script>
+}
