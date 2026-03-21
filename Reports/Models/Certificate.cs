@@ -7,7 +7,6 @@ namespace Reports.Models
     {
         [Key]
         public int Id { get; set; }
-        public string? CertTitle { get; set; }
 
         [Required(ErrorMessage = "Recipient Name is required")]
         [Display(Name = "Recipient Name")]
@@ -28,8 +27,7 @@ namespace Reports.Models
         public DateTime IssueDate { get; set; } = DateTime.Now;
 
         [Display(Name = "Certificate Number")]
-        public string? CertificateNumber { get; set; }
-        public string? CompanyName { get; set; }   
+        public string? CertificateNumber { get; set; }   
         public string? CEO_Name { get; set; }
         public string? CEO_Title { get; set; }
         public byte[]? TrainerSignature { get; set; }

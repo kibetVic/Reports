@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
+    /* Your existing styles remain the same */
     .certificate-form {
         background: #f8f9fa;
         padding: 25px;
@@ -36,7 +37,7 @@
     }
 
     .table thead th {
-        background-color: #2c3e50;
+        background-color: #3498db;
         color: white;
         border: none;
         white-space: nowrap;
@@ -110,6 +111,27 @@
         max-width: 120px;
         text-align: center;
     }
+
+    .btn-action {
+        margin: 0 2px;
+        padding: 4px 8px;
+    }
+
+    #searchInput:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .table-responsive {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .search-highlight {
+        background-color: #fff3cd;
+        transition: background-color 0.3s ease;
+    }
 </style>
 
 <div class="container-fluid">
@@ -144,13 +166,6 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group mb-3">
-                        <label asp-for="CertTitle" class="control-label"></label>
-                        <input asp-for="CertTitle" class="form-control" id="CertTitle" />
-                        <span asp-validation-for="CertTitle" class="text-danger"></span>
-                    </div>
-                </div>
                 <div class="col-md-4">
                     <div class="form-group mb-3">
                         <label asp-for="RecipientName" class="control-label required-field"></label>
@@ -214,7 +229,7 @@
                         <span asp-validation-for="Trainer_Title" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="form-group mb-3">
                         <label class="control-label">CEO Signature (PNG, transparent)</label>
                         <input type="file" name="CEOSignatureFile" accept="image/png" class="form-control" id="CEOSignatureFile" />
@@ -224,7 +239,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="form-group mb-3">
                         <label class="control-label">Trainer Signature (PNG, transparent)</label>
                         <input type="file" name="TrainerSignatureFile" accept="image/png" class="form-control" id="TrainerSignatureFile" />
@@ -235,7 +250,6 @@
                     </div>
                 </div>
             </div>
-            
 
             <div class="form-group mt-4">
                 <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -250,7 +264,20 @@
 
     <!-- Certificates List -->
     <div class="table-container">
-        <h4 class="mb-3"><i class="fas fa-list"></i> Certificates List</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0"><i class="fas fa-list"></i> Certificates List</h4>
+
+            <!-- Search Bar -->
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by any column...">
+                    <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </div>
+        </div>
 
         @if (certificates != null && certificates.Any())
         {
@@ -258,7 +285,6 @@
                 <table class="table table-bordered table-hover" id="certificatesTable">
                     <thead>
                         <tr>
-                            <th>@Html.DisplayNameFor(model => model.CertTitle)</th>
                             <th>@Html.DisplayNameFor(model => model.RecipientName)</th>
                             <th>@Html.DisplayNameFor(model => model.TrainingTitle)</th>
                             <th>@Html.DisplayNameFor(model => model.Location)</th>
@@ -273,17 +299,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in certificates)
+                        @foreach (var item in certificates.OrderByDescending(c => c.IssueDate).ThenByDescending(c => c.Id))
                         {
                             <tr data-id="@item.Id" onclick="selectRow(this, @item.Id)">
-                                <td>@item.CertTitle</td>
-                                <td>@item.RecipientName</td>
-                                <td>@item.TrainingTitle</td>
-                                <td>@item.Location</td>
-                                <td>@item.EventDate.ToString("yyyy-MM-dd")</td>
-                                <td>@item.IssueDate.ToString("yyyy-MM-dd")</td>
-                                <td>@item.CertificateNumber</td>
-                                <td>@item.CEO_Name</td>
+                                <td class="searchable">@item.RecipientName</td>
+                                <td class="searchable">@item.TrainingTitle</td>
+                                <td class="searchable">@item.Location</td>
+                                <td class="searchable">@item.EventDate.ToString("yyyy-MM-dd")</td>
+                                <td class="searchable">@item.IssueDate.ToString("yyyy-MM-dd")</td>
+                                <td class="searchable">@item.CertificateNumber</td>
+                                <td class="searchable">@item.CEO_Name</td>
                                 <td class="signature-cell">
                                     @if (item.CEOSignature != null && item.CEOSignature.Length > 0)
                                     {
@@ -297,7 +322,7 @@
                                         <span class="text-muted">No signature</span>
                                     }
                                 </td>
-                                <td>@item.Trainer_Name</td>
+                                <td class="searchable">@item.Trainer_Name</td>
                                 <td class="signature-cell">
                                     @if (item.TrainerSignature != null && item.TrainerSignature.Length > 0)
                                     {
@@ -373,8 +398,6 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-
-            // Initialize file input previews
             initializeFilePreviews();
         });
 
@@ -384,31 +407,35 @@
             const CEOPreview = document.getElementById('CEOPreview');
             const TrainerPreview = document.getElementById('TrainerPreview');
 
-            CEOInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        CEOPreview.src = e.target.result;
-                        CEOPreview.style.display = 'inline';
+            if (CEOInput) {
+                CEOInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            CEOPreview.src = e.target.result;
+                            CEOPreview.style.display = 'inline';
+                        }
+                        reader.readAsDataURL(this.files[0]);
+                    } else {
+                        CEOPreview.style.display = 'none';
                     }
-                    reader.readAsDataURL(this.files[0]);
-                } else {
-                    CEOPreview.style.display = 'none';
-                }
-            });
+                });
+            }
 
-            TrainerInput.addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        TrainerPreview.src = e.target.result;
-                        TrainerPreview.style.display = 'inline';
+            if (TrainerInput) {
+                TrainerInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            TrainerPreview.src = e.target.result;
+                            TrainerPreview.style.display = 'inline';
+                        }
+                        reader.readAsDataURL(this.files[0]);
+                    } else {
+                        TrainerPreview.style.display = 'none';
                     }
-                    reader.readAsDataURL(this.files[0]);
-                } else {
-                    TrainerPreview.style.display = 'none';
-                }
-            });
+                });
+            }
         }
 
         function selectRow(row, id) {
@@ -428,8 +455,10 @@
             document.getElementById('certificateForm').action = '@Url.Action("Create")';
 
             // Hide previews
-            document.getElementById('CEOPreview').style.display = 'none';
-            document.getElementById('TrainerPreview').style.display = 'none';
+            const ceoPreview = document.getElementById('CEOPreview');
+            const trainerPreview = document.getElementById('TrainerPreview');
+            if (ceoPreview) ceoPreview.style.display = 'none';
+            if (trainerPreview) trainerPreview.style.display = 'none';
 
             if (selectedRow) {
                 selectedRow.classList.remove('selected-row');
@@ -441,37 +470,76 @@
         }
 
         function loadCertificate(id) {
-            fetch(`/Certificates/GetCertificate/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('certificateId').value = data.id;
-                    document.getElementById('CertTitle').value = data.certTitle || '';
-                    document.getElementById('RecipientName').value = data.recipientName || '';
-                    document.getElementById('TrainingTitle').value = data.trainingTitle || '';
-                    document.getElementById('Location').value = data.location || '';
-                    document.getElementById('EventDate').value = data.eventDate ? data.eventDate.split('T')[0] : '';
-                    document.getElementById('IssueDate').value = data.issueDate ? data.issueDate.split('T')[0] : '';
-                    document.getElementById('CertificateNumber').value = data.certificateNumber || '';
-                    document.getElementById('CEO_Name').value = data.ceo_Name || '';
-                    document.getElementById('CEO_Title').value = data.ceo_Title || '';
-                    document.getElementById('Trainer_Name').value = data.trainer_Name || '';
-                    document.getElementById('Trainer_Title').value = data.trainer_Title || '';
+        console.log('Loading certificate with ID:', id); // Debug log
 
-                    document.getElementById('formTitle').innerText = 'Edit Certificate';
-                    document.getElementById('formIcon').className = 'fas fa-edit';
-                    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Certificate';
-                    document.getElementById('certificateForm').action = '/Certificates/Edit/' + id;
+        fetch(`/Certificates/GetCertificate/${id}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Certificate data loaded:', data); // Debug log
 
-                    // Clear file inputs and hide previews (since we can't show existing images in file input)
-                    document.getElementById('CEOSignatureFile').value = '';
-                    document.getElementById('TrainerSignatureFile').value = '';
-                    document.getElementById('CEOPreview').style.display = 'none';
-                    document.getElementById('TrainerPreview').style.display = 'none';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error loading certificate details');
-                });
+                // Set form fields
+                document.getElementById('certificateId').value = data.id;
+                document.getElementById('RecipientName').value = data.recipientName || '';
+                document.getElementById('TrainingTitle').value = data.trainingTitle || '';
+                document.getElementById('Location').value = data.location || '';
+                document.getElementById('EventDate').value = data.eventDate ? data.eventDate.split('T')[0] : '';
+                document.getElementById('IssueDate').value = data.issueDate ? data.issueDate.split('T')[0] : '';
+                document.getElementById('CertificateNumber').value = data.certificateNumber || '';
+                // Remove the CompanyName line since it doesn't exist in your model
+                // document.getElementById('CompanyName').value = data.companyName || '';
+                document.getElementById('CEO_Name').value = data.ceo_Name || '';
+                document.getElementById('CEO_Title').value = data.ceo_Title || '';
+                document.getElementById('Trainer_Name').value = data.trainer_Name || '';
+                document.getElementById('Trainer_Title').value = data.trainer_Title || '';
+
+                // Update form title and button
+                document.getElementById('formTitle').innerText = 'Edit Certificate';
+                document.getElementById('formIcon').className = 'fas fa-edit';
+                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Certificate';
+                document.getElementById('certificateForm').action = '/Certificates/Edit/' + id;
+
+                // Clear file inputs and hide previews
+                const ceoFile = document.getElementById('CEOSignatureFile');
+                const trainerFile = document.getElementById('TrainerSignatureFile');
+                if (ceoFile) ceoFile.value = '';
+                if (trainerFile) trainerFile.value = '';
+
+                const ceoPreview = document.getElementById('CEOPreview');
+                const trainerPreview = document.getElementById('TrainerPreview');
+                if (ceoPreview) ceoPreview.style.display = 'none';
+                if (trainerPreview) trainerPreview.style.display = 'none';
+
+                // Show success message
+                showTemporaryMessage('Certificate loaded successfully!', 'success');
+            })
+            .catch(error => {
+                console.error('Error loading certificate:', error);
+                showTemporaryMessage('Error loading certificate details. Please try again.', 'error');
+            });
+        }
+
+        function showTemporaryMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            const container = document.querySelector('.container-fluid');
+            const firstChild = container.firstChild;
+            container.insertBefore(alertDiv, firstChild);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
         }
 
         function editCertificate(id, event) {
@@ -488,13 +556,6 @@
             document.getElementById('deleteRecipientName').innerText = recipientName;
             deleteModal.show();
         }
-
-        // Optional: Add keyboard shortcut to reset form (Escape key)
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                resetForm();
-            }
-        });
 
         // Prevent row click when clicking action buttons
         document.querySelectorAll('.action-buttons button').forEach(button => {
@@ -535,5 +596,86 @@
                 originalButton.disabled = false;
             }, 2000);
         }
+
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            const table = document.getElementById('certificatesTable');
+            const recordCountSpan = document.getElementById('recordCount');
+
+            if (table) {
+                const rows = table.querySelectorAll('tbody tr');
+
+                function updateRecordCount(visibleCount, totalCount) {
+                    if (recordCountSpan) {
+                        recordCountSpan.textContent = `Showing ${visibleCount} of ${totalCount} records`;
+                    }
+                }
+
+                function searchTable() {
+                    const searchTerm = searchInput.value.toLowerCase().trim();
+                    let visibleCount = 0;
+                    const totalCount = rows.length;
+
+                    rows.forEach(row => {
+                        let rowText = '';
+                        const searchableCells = row.querySelectorAll('.searchable');
+                        searchableCells.forEach(cell => {
+                            rowText += cell.textContent.toLowerCase() + ' ';
+                        });
+
+                        if (searchTerm === '' || rowText.includes(searchTerm)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    updateRecordCount(visibleCount, totalCount);
+
+                    const noResultsRow = document.getElementById('noResultsRow');
+                    if (visibleCount === 0) {
+                        if (!noResultsRow) {
+                            const tbody = table.querySelector('tbody');
+                            const tr = document.createElement('tr');
+                            tr.id = 'noResultsRow';
+                            const td = document.createElement('td');
+                            td.colSpan = table.querySelector('thead tr').cells.length;
+                            td.className = 'text-center text-muted';
+                            td.innerHTML = '<i class="fas fa-search"></i> No matching records found';
+                            tr.appendChild(td);
+                            tbody.appendChild(tr);
+                        }
+                    } else if (noResultsRow) {
+                        noResultsRow.remove();
+                    }
+                }
+
+                if (searchInput) {
+                    searchInput.addEventListener('keyup', searchTable);
+                }
+
+                if (clearSearchBtn) {
+                    clearSearchBtn.addEventListener('click', function() {
+                        if (searchInput) {
+                            searchInput.value = '';
+                            searchTable();
+                            searchInput.focus();
+                        }
+                    });
+                }
+
+                updateRecordCount(rows.length, rows.length);
+            }
+        });
+
+        // Escape key to reset form
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                resetForm();
+            }
+        });
     </script>
 }

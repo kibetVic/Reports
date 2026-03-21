@@ -73,20 +73,46 @@ namespace Reports.Controllers
             return View("Index", certificate);
         }
 
-        // GET: Certificates/Edit/5 (AJAX endpoint)
+        // GET: Certificates/GetCertificate/5 (AJAX endpoint)
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetCertificate(int id)
         {
-            var certificate = await _context.Certificates.FindAsync(id);
-            if (certificate == null)
+            try
             {
-                return NotFound();
+                var certificate = await _context.Certificates.FindAsync(id);
+                if (certificate == null)
+                {
+                    return NotFound(new { message = "Certificate not found" });
+                }
+
+                // Return the data with camelCase property names for JavaScript
+                var result = new
+                {
+                    id = certificate.Id,
+                    recipientName = certificate.RecipientName ?? "",
+                    trainingTitle = certificate.TrainingTitle ?? "",
+                    location = certificate.Location ?? "",
+                    eventDate = certificate.EventDate.ToString("yyyy-MM-dd"),
+                    issueDate = certificate.IssueDate.ToString("yyyy-MM-dd"),
+                    certificateNumber = certificate.CertificateNumber ?? "",
+                    ceo_Name = certificate.CEO_Name ?? "",
+                    ceo_Title = certificate.CEO_Title ?? "",
+                    trainer_Name = certificate.Trainer_Name ?? "",
+                    trainer_Title = certificate.Trainer_Title ?? ""
+                };
+
+                return Json(result);
             }
-            return Json(certificate);
+            catch (Exception ex)
+            {
+                // Log the error to console or to your logging system
+                Console.WriteLine($"Error in GetCertificate: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                return StatusCode(500, new { message = "Error loading certificate details", error = ex.Message });
+            }
         }
-
-
 
         // POST: Certificates/Edit/5
         [Authorize]
@@ -114,14 +140,12 @@ namespace Reports.Controllers
                         return NotFound();
 
                     // Update fields
-                    existingCert.CertTitle = certificate.CertTitle;
                     existingCert.RecipientName = certificate.RecipientName;
                     existingCert.TrainingTitle = certificate.TrainingTitle;
                     existingCert.Location = certificate.Location;
                     existingCert.EventDate = certificate.EventDate;
                     existingCert.IssueDate = certificate.IssueDate;
                     existingCert.CertificateNumber = certificate.CertificateNumber;
-                    existingCert.CompanyName = certificate.CompanyName;
                     existingCert.CEO_Name = certificate.CEO_Name;
                     existingCert.CEO_Title = certificate.CEO_Title;
                     existingCert.Trainer_Name = certificate.Trainer_Name;
